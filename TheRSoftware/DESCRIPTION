@@ -1,0 +1,13 @@
+Package: TheRSoftware
+Type: Package
+Title: Functions and datasets to accompany the book "The R Software:
+        Fundamentals of Programming and Statistical Analysis"
+Version: 1.0
+Date: 2014-02-04
+Author: Lafaye de Micheaux Pierre, Drouilhet Remy, Liquet Benoit 
+Maintainer: P Lafaye de Micheaux <lafaye@dms.umontreal.ca>
+Description: This package provides functions and datasets for the reader of the book "The R Software: Mastering the language, Performing statistical analysis".
+License: GPL (>= 2)
+LazyLoad: yes
+Depends: xtable, RColorBrewer, gdata, IndependenceTests
+Packaged: 2014-02-04 04:23:37 UTC; root

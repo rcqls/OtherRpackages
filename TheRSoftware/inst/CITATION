@@ -1,0 +1,19 @@
+citHeader("To cite the package TheRSoftware in your publications, please use:")
+
+citEntry(entry="Book",
+         title = "The R Software, Mastering the language, Performing statistical analysis",
+         author = personList(as.person("Lafaye de Micheaux, P."),
+	 as.person("Drouilhet, R."),
+	 as.person("Liquet, B.")),
+	 publisher = "Springer",
+         year         = "2012",
+         note         = "Software: R Package, TheRSoftware, version 1.0",
+         url          = "http://www.biostatisticien.eu/springeR/",
+         
+         textVersion = 
+         paste("Lafaye De Micheaux, P. and Drouilhet, R. and Liquet, B. (2010)", 
+               "The R Software, Mastering the language, Performing statistical analysis",
+               "Springer, 2012",
+              "(Software: R Package, TheRSoftware, version 1.0)"
+	      )
+)

@@ -1,0 +1,6 @@
+useDynLib(TheRSoftware)
+exportPattern("^[[:alpha:]]+")
+import(xtable)
+import(RColorBrewer)
+import(gdata)
+

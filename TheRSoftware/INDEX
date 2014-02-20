@@ -1,0 +1,18 @@
+arrowaxis	     Adding arrows on statistical plots
+barchart	     Bar charts
+bin2dec		     Decimal representation of a binary number
+BIRTH.WEIGHT	     Weight at Birth dataset
+BMI.CHILD	     Body Mass Index of children dataset
+camembert	     Pie chart
+cor0.test	     Test of the correlation coefficient
+cor.test.2.sample    Comparing statistically two correlation coefficients
+crosschart	     A cross chart
+dec2bin		     Binary representation of a decimal number
+flashy.plot	     A flashy scatter plot
+getaddr		     Retrieve the address in memory of a variable
+INFARCTION	     Study Case of Myocardial Infarction
+INTIMA.MEDIA	     Intima-Media Thickness
+mpinv		     Moore Penrose inverse
+NUTRIELDERLY	     Diet of Elderly People dataset
+sigma2.test	     Test of a variance
+writeaddr	     Writing a value at some memory address
