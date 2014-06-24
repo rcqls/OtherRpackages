@@ -5,11 +5,11 @@ VectorAddr <- getaddr <- function(x) {
   #dyn.load("getaddr.so")
   
   if (is.integer(x)) {  
-    addr <- list(shift=0L,zero=.Call("getAddrInt",x))
+    addr <- list(shift=0L,zero=.Call("getAddrInt",x,PACKAGE="LeLogicielR"))
     attr(addr,"type") <- "integer"
     attr(addr,"size") <- as.integer(round((log(.Machine$integer.max,base=2)+1)/8))
   } else if (is.double(x))  { 
-    addr <- list(shift=0L,zero=.Call("getAddrDbl",x))
+    addr <- list(shift=0L,zero=.Call("getAddrDbl",x,PACKAGE="LeLogicielR"))
     attr(addr,"type") <- "double"
     attr(addr,"size") <- as.integer((.Machine$double.exponent + .Machine$double.digits)/8)
   } else addr <- NULL
@@ -27,7 +27,7 @@ VectorAddr <- getaddr <- function(x) {
 
 print.VectorAddr <- function(addr) {
   #dyn.load("getaddr.so")
-  .Call("printAddr",addr$zero+addr$shift)
+  .Call("printAddr",addr$zero+addr$shift,PACKAGE="LeLogicielR")
   #dyn.unload("getaddr.so")
 }
 
@@ -55,13 +55,13 @@ update.VectorAddr <- writeaddr <- function(addr,newval) {
   integer = #(is.integer(newval)) 
   {
     #dyn.load("getaddr.so")
-    .Call("writeAtAddrInt",addr$zero+addr$shift,newval)
+    .Call("writeAtAddrInt",addr$zero+addr$shift,newval,PACKAGE="LeLogicielR")
     #dyn.unload("getaddr.so")
   },
   double = #if (is.double(newval)) 
   {
     #dyn.load("getaddr.so")
-    .Call("writeAtAddrDbl",addr$zero+addr$shift,newval)
+    .Call("writeAtAddrDbl",addr$zero+addr$shift,newval,PACKAGE="LeLogicielR")
     #dyn.unload("getaddr.so")
   })
   return(invisible())

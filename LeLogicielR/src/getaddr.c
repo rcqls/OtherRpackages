@@ -1,5 +1,6 @@
 #include <R.h>
 #include <Rinternals.h>
+#include <R_ext/Rdynload.h>
 
 SEXP getAddrDbl(SEXP ptr)   {
     double * _ptr,* _addret;
@@ -69,3 +70,17 @@ SEXP printAddr(SEXP addr) {
   UNPROTECT(1);
   return R_NilValue;
 }
+
+static R_CallMethodDef callMethods[] = {
+        {"getAddrDbl", (DL_FUNC) &getAddrDbl, 1},
+        {"getAddrInt", (DL_FUNC) &getAddrInt, 1},
+        {"writeAtAddrDbl", (DL_FUNC) &writeAtAddrDbl, 2},
+        {"writeAtAddrInt", (DL_FUNC) &writeAtAddrInt, 2},
+        {"printAddr", (DL_FUNC) &printAddr, 1},
+        {NULL, NULL, 0}
+     };
+
+void R_init_LeLogicielR(DllInfo *info)
+     {
+        R_registerRoutines(info, NULL, callMethods, NULL, NULL);
+     };

@@ -1,5 +1,4 @@
 .onLoad <- function(libname,pkg){
-
   library.dynam("LeLogicielR", pkg, libname)
   packageStartupMessage(utils::packageDescription('LeLogicielR',lib.loc = libname),appendLF=TRUE)
 
