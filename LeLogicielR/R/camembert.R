@@ -1,4 +1,5 @@
-camembert <- function(x,col=NULL,family="HersheyScript") {
+camembert <- function(x,col=NULL,cex=0.7,family="sans",family.main="HersheyScript",main=NULL,col.main="black",cex.main=0.5) {
+  if(is.null(main)) main <- paste("Diagramme circulaire",paste(" de la variable",deparse(substitute(x))),sep="\n")
   var <- sort(table(x)/length(x))
   sauve.par <- par(no.readonly = TRUE)
   #par(bg="#4B5475",fg="white")
@@ -13,9 +14,8 @@ camembert <- function(x,col=NULL,family="HersheyScript") {
   abline(h=(-2:2)*0.4,col="#7A86AF",lty=8)
   par(new=TRUE)
   pie(var,labels=paste(names(var)," (",format(100*round(var,2))," %)",sep=""),
-      col=col,cex=0.7,border="black")
-  title(main = paste("Diagramme circulaire",paste(" de la variable"
-          ,deparse(substitute(x))),sep="\n"),family=family,cex=0.5,col.main="black")
+      col=col,cex=cex,border="black",family=family)
+  title(main = main,family=family.main,cex=cex.main,col.main=col.main)
   #par(sauve.par)
   box("outer", col = "white", lwd=7)
   #box("inner", col = "grey", lwd=2)

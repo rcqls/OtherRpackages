@@ -1,75 +1,69 @@
-getaddr <- function(x) {
+VectorAddr <- getaddr <- function(x) {
 
   if (! is.vector(x)) stop("x should be a vector")
 
-  addret <- integer(2)
-  dyn.load(paste("getaddr",.Platform$dynlib.ext,sep=""))
-  if (is.integer(x))  {  
-    valret <- 0L
-    out <- .C("getAddrForInt",x=x,addret=addret,valret=valret,DUP=FALSE)
-  }
-  if (is.double(x))   { 
-    valret <- 0.0
-    out <- .C("getAddrForDbl",x=x,addret=addret,valret=valret,DUP=FALSE)
-  }
-  dyn.unload(paste("getaddr",.Platform$dynlib.ext,sep=""))                               
-  ## To improve for 64bits
-  res <- sprintf("0x%X", as.integer(out$addret))
+  #dyn.load("getaddr.so")
+  
+  if (is.integer(x)) {  
+    addr <- list(shift=0L,zero=.Call("getAddrInt",x))
+    attr(addr,"type") <- "integer"
+    attr(addr,"size") <- as.integer(round((log(.Machine$integer.max,base=2)+1)/8))
+  } else if (is.double(x))  { 
+    addr <- list(shift=0L,zero=.Call("getAddrDbl",x))
+    attr(addr,"type") <- "double"
+    attr(addr,"size") <- as.integer((.Machine$double.exponent + .Machine$double.digits)/8)
+  } else addr <- NULL
 
+  #dyn.unload("getaddr.so")
 
- obj<-list(addr.int=out$addret,addr.hex=res,value.at.addr=out$valret)
- class(obj) <- "ptrAddr"
+  if(is.null(addr)) stop("x should be double or integer")
 
- obj
+  attr(addr,"length") <- length(x)
+  attr(addr,"out.of.bounds") <- FALSE
+  class(addr) <- "VectorAddr"
+  return(addr)
   
 }
 
-Arith.ptrAddr <- function(e1,e2) {
-  if(e2)
-
+print.VectorAddr <- function(addr) {
+  #dyn.load("getaddr.so")
+  .Call("printAddr",addr$zero+addr$shift)
+  #dyn.unload("getaddr.so")
 }
 
-writeaddr <- function(addr,newval,at=0L) {
+Ops.VectorAddr <- function(e1,e2) {
+  if(.Generic=="+" && is.integer(e2)) {
+    ee <- e1
+    ee$shift <- e2
+    if(e2 < 0 || e2 > (attr(ee,"length")-1L) * attr(ee,"size") ) {
+        warning("address out of range")
+        attr(ee,"out.of.bounds") <- TRUE
+    } else attr(ee,"out.of.bounds") <- FALSE
+    ee
+  }
+}
 
-  #if (length(addr) != 1) stop("addr should be of length 1")
+update.VectorAddr <- writeaddr <- function(addr,newval) {
+
+  if(!inherits(addr,"VectorAddr")) stop("First argument has to be of class Addr")
+  
   if (length(newval) != 1) stop("newval should be of length 1")
-  addr.int <- as.integer(addr$addr.int)
-  addr.int[1] <- addr.int[1]+at
-  dyn.load(paste("getaddr",.Platform$dynlib.ext,sep=""))
-  if (is.integer(newval)) {
-    .C("writeAtAddrForInt",addr.int,newval,DUP=FALSE)
-  }
+  
+  if(attr(addr,"out.of.bounds")) stop("address out of bounds")
 
-  if (is.double(newval)) {
-    .C("writeAtAddrForDbl",addr.int,newval,DUP=FALSE)
-  }
-  dyn.unload(paste("getaddr",.Platform$dynlib.ext,sep=""))
+  switch(attr(addr,"type"), 
+  integer = #(is.integer(newval)) 
+  {
+    #dyn.load("getaddr.so")
+    .Call("writeAtAddrInt",addr$zero+addr$shift,newval)
+    #dyn.unload("getaddr.so")
+  },
+  double = #if (is.double(newval)) 
+  {
+    #dyn.load("getaddr.so")
+    .Call("writeAtAddrDbl",addr$zero+addr$shift,newval)
+    #dyn.unload("getaddr.so")
+  })
+  return(invisible())
 }
 
-
-x <- 1L
-x
-getAddr(x)
-
-
-addr <- getAddr(x)
-addr # adresse (exprimée en valeur entière) de la première case mémoire du bloc mémoire de 8 octets contenant x
-newval <- 3L
-writeAddr(addr,newval)
-x
-
-
-x <- 2.75
-addr <- getAddr(x)
-addr # L'adresse a changé car on a changé le type de x
-#newval <- pi
-writeAddr(addr,pi)
-x
-
-getAddr(x)
-
-x <- c(3L,4L)
-x
-addr <- getAddr(x) # Récupère l'adresse de la première case du bloc de cases où est stocké x
-writeAddr(addr,6L);x
-writeAddr(addr,7L,4L);x
