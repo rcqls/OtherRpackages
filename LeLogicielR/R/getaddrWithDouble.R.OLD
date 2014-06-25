@@ -27,7 +27,7 @@ VectorAddr <- getaddr <- function(x) {
 
 print.VectorAddr <- function(addr) {
   #dyn.load("getaddr.so")
-  .Call("printAddr",c(addr$zero[1]+addr$shift,addr$zero[2]),PACKAGE="LeLogicielR")
+  .Call("printAddr",addr$zero+addr$shift,PACKAGE="LeLogicielR")
   #dyn.unload("getaddr.so")
 }
 
@@ -55,13 +55,13 @@ update.VectorAddr <- writeaddr <- function(addr,newval) {
   integer = #(is.integer(newval)) 
   {
     #dyn.load("getaddr.so")
-    .Call("writeAtAddrInt",c(addr$zero[1]+addr$shift,addr$zero[2]),newval,PACKAGE="LeLogicielR")
+    .Call("writeAtAddrInt",addr$zero+addr$shift,newval,PACKAGE="LeLogicielR")
     #dyn.unload("getaddr.so")
   },
   double = #if (is.double(newval)) 
   {
     #dyn.load("getaddr.so")
-    .Call("writeAtAddrDbl",c(addr$zero[1]+addr$shift,addr$zero[2]),newval,PACKAGE="LeLogicielR")
+    .Call("writeAtAddrDbl",addr$zero+addr$shift,newval,PACKAGE="LeLogicielR")
     #dyn.unload("getaddr.so")
   })
   return(invisible())

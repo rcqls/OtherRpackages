@@ -3,42 +3,30 @@
 #include <R_ext/Rdynload.h>
 
 SEXP getAddrDbl(SEXP ptr)   {
-    double * _ptr;
-    int* _addret;
+    double * _ptr,* _addret;
     SEXP addret;
-
-    int a[2];
-    int* *p;
      
     ptr = PROTECT(coerceVector(ptr, REALSXP));
-    addret = PROTECT(allocVector(INTSXP, 2));
-    _ptr=REAL(ptr); _addret=INTEGER(addret);
-    a[0]=a[1]=0;
-
-    p=(int**)&a;
-    *p=(int*)_ptr;
-    _addret[0]=a[0];_addret[1]=a[1];
+    addret = PROTECT(allocVector(REALSXP, 1));
+    _ptr=REAL(ptr); _addret=REAL(addret);
+    _addret[0] = (double)(unsigned long int)(*(&_ptr)); // adresse du 1er octet de ptr  
     UNPROTECT(2);
     return addret;
 }
 
 SEXP writeAtAddrDbl(SEXP addr,SEXP newval) {
-    double * _newval;
-    int* _addr; 
-    int a[2];
-    unsigned long int *raddr;
+    double * _addr,* _newval;
 
     double *p;
     // &p = adresse de p
     // p = addresse vers laquelle pointe p
     // *p = valeur de la case à l'adresse p
-    addr = PROTECT(coerceVector(addr, INTSXP));
+    addr = PROTECT(coerceVector(addr, REALSXP));
     newval = PROTECT(coerceVector(newval, REALSXP));
-    _addr=INTEGER(addr); _newval=REAL(newval);
-    a[0]=_addr[0];a[1]=_addr[1];
-    raddr=(long unsigned int *)a;
-    p = (double *)*raddr;
+    _addr=REAL(addr); _newval=REAL(newval);
+    p = (double *)(unsigned long int)(_addr[0]); // Identique à p = *addr; mais sans warning à la compilation
     *p = (double)(_newval[0]); // Identique à *p = *newval; mais sans warning à la compilation
+//    Rprintf("%p %d %i\n", &p, p, *p);
     UNPROTECT(2);
   return R_NilValue;
 
@@ -46,55 +34,39 @@ SEXP writeAtAddrDbl(SEXP addr,SEXP newval) {
 
 SEXP getAddrInt(SEXP ptr)   {
     int * _ptr;
-    int* _addret;
+    double * _addret;
     SEXP addret;
-
-    int a[2];
-    int* *p;
      
     ptr = PROTECT(coerceVector(ptr, INTSXP));
-    addret = PROTECT(allocVector(INTSXP, 2));
-    _ptr=INTEGER(ptr); _addret=INTEGER(addret);
-    a[0]=a[1]=0;
-
-    p=(int**)&a;
-    *p=(int*)_ptr;
-    _addret[0]=a[0];_addret[1]=a[1];
+    addret = PROTECT(allocVector(REALSXP, 1));
+    _ptr=INTEGER(ptr); _addret=REAL(addret);
+    _addret[0] = (double)(unsigned long int)(*(&_ptr)); // adresse du 1er octet de ptr  
     UNPROTECT(2);
     return addret;
 }
 
 SEXP writeAtAddrInt(SEXP addr,SEXP newval) {
+    double * _addr;
     int * _newval;
-    int* _addr; 
-    int a[2];
-    unsigned long int *raddr;
 
     int *p;
     // &p = adresse de p
     // p = addresse vers laquelle pointe p
     // *p = valeur de la case à l'adresse p
-    addr = PROTECT(coerceVector(addr, INTSXP));
+    addr = PROTECT(coerceVector(addr, REALSXP));
     newval = PROTECT(coerceVector(newval, INTSXP));
-    _addr=INTEGER(addr); _newval=INTEGER(newval);
-    a[0]=_addr[0];a[1]=_addr[1];
-    raddr=(long unsigned int *)a;
-    p = (int *)*raddr;
+    _addr=REAL(addr); _newval=INTEGER(newval);
+    p = (int *)(unsigned long int)(_addr[0]); // Identique à p = *addr; mais sans warning à la compilation
     *p = (int)(_newval[0]); // Identique à *p = *newval; mais sans warning à la compilation
+//    Rprintf("%p %d %i\n", &p, p, *p);
     UNPROTECT(2);
   return R_NilValue;
 
 }
 
 SEXP printAddr(SEXP addr) {
-    int* _addr; 
-    int a[2];
-    unsigned long int *raddr;
-    addr = PROTECT(coerceVector(addr, INTSXP));
-    _addr=INTEGER(addr);
-    a[0]=_addr[0];a[1]=_addr[1];
-    raddr=(long unsigned int *)a;
-  Rprintf("<vector: %p>\n",*raddr);
+  addr = PROTECT(coerceVector(addr, REALSXP));
+  Rprintf("<vector: %p>\n",(unsigned long int)(REAL(addr)[0]));
   UNPROTECT(1);
   return R_NilValue;
 }
