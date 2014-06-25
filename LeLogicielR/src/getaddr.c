@@ -66,7 +66,7 @@ SEXP writeAtAddrInt(SEXP addr,SEXP newval) {
 
 SEXP printAddr(SEXP addr) {
   addr = PROTECT(coerceVector(addr, REALSXP));
-  Rprintf("VectorAddr: %p\n",(unsigned long int)(REAL(addr)[0]));
+  Rprintf("<vector: %p>\n",(unsigned long int)(REAL(addr)[0]));
   UNPROTECT(1);
   return R_NilValue;
 }
