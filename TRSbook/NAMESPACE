@@ -1,0 +1,7 @@
+useDynLib(TRSbook)
+exportPattern("^[[:alpha:]]+")
+import(xtable)
+import(RColorBrewer)
+import(gdata)
+import(IndependenceTests)
+
