@@ -25,9 +25,9 @@ VectorAddr <- getaddr <- function(x) {
   
 }
 
-print.VectorAddr <- function(addr) {
+print.VectorAddr <- function(x,...) {
   #dyn.load("getaddr.so")
-  .Call("printAddr",c(addr$zero[1]+addr$shift,addr$zero[2]),PACKAGE="TRSbook")
+  .Call("printAddr",c(x$zero[1]+x$shift,x$zero[2]),PACKAGE="TRSbook")
   #dyn.unload("getaddr.so")
 }
 
@@ -43,7 +43,7 @@ Ops.VectorAddr <- function(e1,e2) {
   }
 }
 
-update.VectorAddr <- writeaddr <- function(addr,newval) {
+writeaddr <- function(addr,newval) {
 
   if(!inherits(addr,"VectorAddr")) stop("First argument has to be of class Addr")
   
@@ -66,4 +66,6 @@ update.VectorAddr <- writeaddr <- function(addr,newval) {
   })
   return(invisible())
 }
+
+update.VectorAddr <- function(object,...) writeaddr(object,...)
 
