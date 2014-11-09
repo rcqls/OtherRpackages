@@ -1,0 +1,9 @@
+Package: CqlsMM
+Version: 0.0.1
+Date: 2014-11-01
+Title: Cqls interface for Mixed Models
+Author: Cqls Team
+Maintainer: Remy Drouilhet <rdrouilh@gmail.com>
+Depends: R (>= 3.0.0), lme4 (>= 1.0.0)
+Description: Attempt to provide an interface for lmer function based on the case-sensitive principle to describe fixed and random factors.
+License: GPL (>= 2)
