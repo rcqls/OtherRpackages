@@ -61,10 +61,3 @@ lmer.cqls <- function(formula,data,...) {
     require(lme4)
     lmer(formula,df,...)
 }
-
-require(lme4)
-# y <- rnorm(4)
-# x <- factor(c("to","to","ti","ti"))
-# u <- factor(c("ta","tu","tu","ta"))
-# df <- data.frame(y=y,x=x,u=u)
-#lmer.cqls(Y ~ U + I(x^2)*(1+U),df)
