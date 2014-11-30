@@ -1,4 +1,11 @@
-lmer.cqls <- function(formula,data,...) {
+## In the CqlsMM interface, test random effect
+is.random.factor <- function(vn) {
+    charToRaw("A") <= (charToRaw(substring(vn,1,1))->tmp) & tmp <= charToRaw("Z")
+}
+
+## data.frame with tolower variable names
+
+data.frame.CqlsMM <- function(formula,data) {
     vars.form <- all.vars(formula)
     ## Maybe find recursively until globalenv()
     # if(missing(data)) {
@@ -11,12 +18,17 @@ lmer.cqls <- function(formula,data,...) {
     # names(dict) <- vars.form
     df <- data[match(tolower(vars.form),tolower(vars))]
     names(df) <- vars.form
+    attr(df,"has.random.factor") <- any(sapply(vars.form,is.random.factor))
+    df  
+}
+
+## Conversion of formula taking into account 
+## lower (fixed effect) and upper (random effect) variables
+
+formula.CqlsMM <- function(formula) {
     # terms
     terms <- terms(formula)
-    is.random.factor <- function(vn) {
-        charToRaw("A") <= (charToRaw(substring(vn,1,1))->tmp) & tmp <= charToRaw("Z")
-    }
-
+    
     # create terms random matrix (like attr(terms,"factors"))
     nc <- ncol(attr(terms,"factors"))
     attr(terms,"random") <- t(sapply(rownames(attr(terms,"factors")),function(fa) {
@@ -54,10 +66,39 @@ lmer.cqls <- function(formula,data,...) {
     formula.ch <- paste0(formula.ch,paste(formula.terms,collapse=" + ")) 
 
     formula.old <- formula
+
     formula <- as.formula(formula.ch)
-
-    #print(list(df=df,term=terms,formula=formula,formula.old=formula.old))
-
-    require(lme4)
-    lmer(formula,df,...)
+    ## print(list(df=df,term=terms,formula=formula,formula.old=formula.old))
+    
+    formula
 }
+
+## lmm.cqls interface including both lm and lmer
+lmm.cqls <- function(formula,data,...) {
+    ## apply fix one: y ~ (1 + z1 + Z2) + (1 + z1 + Z2)*x
+    form <- formula.fix.one(formula)
+    df <- data.frame.CqlsMM(form,data)
+    if(attr(df,"has.random.factor")) {
+        require(lme4)
+        form <- formula.CqlsMM(form)
+        lmer(form,df,...)
+    } else lm(form,df,...)
+}
+
+## lmer.cqls interface
+lmer.cqls <- function(formula,data,...) {
+    require(lme4)
+    ## apply fix one: y ~ (1 + z1 + Z2) + (1 + z1 + Z2)*x
+    form <- formula.fix.one(formula)
+    df <- data.frame.CqlsMM(form,data)
+    ## apply CqlsMM interface
+    form <- formula.CqlsMM(form)
+    lmer(form,df,...)
+}
+
+## lm.cqls interface only
+
+lm.cqls <- function(formula,...) {
+    lm(formula.fix.one(formula),...)
+}
+
