@@ -1,0 +1,9 @@
+Package: CqlsVAM
+Version: 0.0.1
+Date: 2015-15-05
+Title: Virtual Age Models
+Author: Cqls Team
+Maintainer: Remy Drouilhet <rdrouilh@gmail.com>
+Depends: R (>= 3.0.0)
+Description: First prototype for virtual Age models.
+License: GPL (>= 2)
