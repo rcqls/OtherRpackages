@@ -6,7 +6,7 @@
 sim.vam <- function(formula,family="weibull",data) {
 	# Have to generate both MC + MP
 	# formula has to provide the two parts
-	# sim.vam(~ARA1(rhoC=2) | ARA1(rhoP=3) )
+	# sim.vam(~ARA1(rho=2) + ARA1(rho=3,P="") )
 	# TODO parsing formula later
 
 	obj <- list(vam=ara.va.model(1,rhoC=.5,1,rhoP=.6),family=weibull.family.vam())
@@ -17,7 +17,7 @@ sim.vam <- function(formula,family="weibull",data) {
 # stop.policy: number of events, events before time,....
 simulate.sim.vam <- function(obj,nbsim=1,stop.policy=10,seed = NULL) {
 	# return a data.frame of the form
-	# data.frame(time=,maintenance=)
+	# data.frame(Time=,Type=)
 
 }
 
