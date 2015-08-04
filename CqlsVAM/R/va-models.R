@@ -1,26 +1,26 @@
 
 
-ara1.va.model <- function(rho,maintenance.polycy=NULL) {
-	#VPlus history not needed! Only the last previous one required!
+ara1.va.model <- function(rho,maintenance.policy=NULL,vam.context=NULL) {
+	#Vp history not needed: the current updates from the previous one!
 	obj <- list(
 			rho=rho,
 			maintenance.policy=maintenance.polycy,
-	 		Vp=expression(Vp[k] <- (1-rho)*(Time[k]-Time[k-1])+Vp[k-1]),
-			V=expression(Vp[k]+time-Time[k]),
-			VInv=expression(time+Time[k]-Vp[k])
+	 		Vp=expression(Vp <- (1-rho)*(Time[k]-Time[k-1])+Vp), # Vp[k] <- (1-rho)*(Time[k]-Time[k-1])+Vp[k-1]
+			V=expression(Vp+time-Time[k]),
+			VInv=expression(time+Time[k]-Vp)
 		)
 	class(obj) <- c("ara1","va.model")
 	obj
 }
 
-araInf.va.model <- function(rho,maintenance.polycy=NULL) {
-	#VPlus history not needed! Only the last previous one required!
+araInf.va.model <- function(rho,maintenance.policy=NULL) {
+	#Vp history not needed: the current updates from the previous one!
 	obj <- list(
 			rho=rho,
-			maintenance.policy=maintenance.polycy,
-	 		Vp=expression(Vp[k] <- (1-rho)*(Time[k]-Time[k-1]+Vp[k-1])),
-			V=expression(Vp[k]+time-Time[k]),
-			VInv=expression(time+Time[k]-Vp[k])
+			maintenance.policy=maintenance.policy,
+	 		Vp=expression(Vp <- (1-rho)*(Time[k]-Time[k-1]+Vp)), # Vp[k] <- (1-rho)*(Time[k]-Time[k-1]+Vp[k-1])
+			V=expression(Vp+time-Time[k]),
+			VInv=expression(time+Time[k]-Vp)
 		)
 	class(obj) <- c("araInf","va.model")
 	obj
