@@ -2,20 +2,20 @@
 ## The values need not sum to 1!
 ## Other strategy to fix the type of the event could be investigated (by cycling for example)
 
-maintenance.policy.periodic <- function(by,from=0,prob=1) {
+Periodic.maintenance.policy <- function(by,from=0,prob=1) {
 	obj <- list(from=from,by=by,prob=prob)
-	class(obj) <- c("maintenance.policy.periodic","maintenance.policy")
+	class(obj) <- c("Periodic.maintenance.policy","maintenance.policy")
 	obj 
 }
 
-update.maintenance.policy.periodic <- function(obj,current) {
+update.Periodic.maintenance.policy <- function(obj,current) {
 	list(
 		time=obj$from + (floor((current-obj$from)/obj$by) + 1 ) * obj$by,
 		type=sample.int(length(obj$prob),1,replace=TRUE,prob=obj$prob)
 	)
 }
 
-maintenance.policy.recycling <- function(inter.times,types) {
+Recycling.maintenance.policy <- function(inter.times,types) {
 	if(length(inter.times) != length(types)) stop("inter.times and types have to have the same length")
 	obj <- new.env()
 	obj$inter.times <- inter.times
@@ -24,13 +24,13 @@ maintenance.policy.recycling <- function(inter.times,types) {
 	obj$current.time <- inter.times[1]
 	obj$current.index <- types[1]
 
-	class(obj) <- c("maintenance.policy.recycling","maintenance.policy")
+	class(obj) <- c("Recycling.maintenance.policy","maintenance.policy")
 	obj 
 }
 
 ## recycling policy: recycling along a sequence of events and types
 
-update.maintenance.policy.recycling <- function(obj,current) {
+update.Recycling.maintenance.policy <- function(obj,current) {
 	if(current > obj$current.time) {
 		obj$current.index <- (obj$current.index %% obj$ntypes) + 1
 		obj$current.time <- obj$current.time + obj$inter.times[obj$current.index]
@@ -41,16 +41,16 @@ update.maintenance.policy.recycling <- function(obj,current) {
 
 ## times and types are prefixed. Inf is added at the end to ensure the end of maintenance
 
-maintenance.policy.fixed <- function(times,types) {
+Fixed.maintenance.policy <- function(times,types) {
 	obj <- new.env()
 	obj$times <- c(times,Inf)
 	obj$types <- c(types,NA)
 	obj$current.index <- 1
-	class(obj) <- c("maintenance.policy.fixed","maintenance.policy")
+	class(obj) <- c("Fixed.maintenance.policy","maintenance.policy")
 	obj 
 }
 
-update.maintenance.policy.fixed <- function(obj,current) {
+update.Fixed.maintenance.policy <- function(obj,current) {
 	if(current > obj$times[obj$current.index]) obj$current.index <- obj$current.index + 1
 	list(time=obj$times[obj$current.index],type=obj$types[obj$current.index]) 
 }

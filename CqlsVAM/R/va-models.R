@@ -2,7 +2,7 @@
 #	!is.null(obj$maintenance.policy)
 #}
 
-ara1.va.model <- function(rho) {
+ARA1.va.model <- function(rho) {
 	#Vp history not needed: the current updates from the previous one!
 	obj <- list(
 			rho=rho,
@@ -14,11 +14,11 @@ ara1.va.model <- function(rho) {
 			V=function(time,k,Time,Vp,rho) Vp+time-Time[k],
 			VInv=function(time,k,Time,Vp,rho) time+Time[k]-Vp
 		)
-	class(obj) <- c("ara1","va.model")
+	class(obj) <- c("ARA1","va.model")
 	obj
 }
 
-araInf.va.model <- function(rho) {
+ARAInf.va.model <- function(rho) {
 	#Vp history not needed: the current updates from the previous one!
 	obj <- list(
 			rho=rho,
@@ -30,7 +30,7 @@ araInf.va.model <- function(rho) {
 			V=function(time,k,Time,Vp,rho) Vp+time-Time[k],
 			VInv=function(time,k,Time,Vp,rho) time+Time[k]-Vp
 		)
-	class(obj) <- c("araInf","va.model")
+	class(obj) <- c("ARAInf","va.model")
 	obj
 }
 
