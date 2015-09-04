@@ -2,54 +2,42 @@
 #	!is.null(obj$maintenance.policy)
 #}
 
-ARA1.va.model <- function(rho) {
+virtual.age <- function(x,...) UseMethod("virtual.age") 
+
+inverse.virtual.age <- function(x,...) UseMethod("inverse.virtual.age")
+
+ARA1.va.model <- function(rho,vam) {
 	#Vp history not needed: the current updates from the previous one!
-	obj <- list(
-			rho=rho,
-	 		#Vp=expression(Vp <- (1-rho)*(Time[k]-Time[k-1])+Vp), # Vp[k] <- (1-rho)*(Time[k]-Time[k-1])+Vp[k-1]
-			#V=expression(Vp+time-Time[k]),
-			#VInv=expression(time+Time[k]-Vp)
-			Vp=function(V,Vp,rho) (1-rho)*(V-Vp)+Vp,
-			# Trop specifique aux ARA: Vp=function(k,Time,Vp,rho) (1-rho)*(Time[k]-Time[k-1])+Vp, # Vp[k] <- (1-rho)*(Time[k]-Time[k-1])+Vp[k-1]
-			V=function(time,k,Time,Vp,rho) Vp+time-Time[k],
-			VInv=function(time,k,Time,Vp,rho) time+Time[k]-Vp
-		)
+	obj <- list(rho=rho,vam=vam)
 	class(obj) <- c("ARA1","va.model")
 	obj
 }
 
-ARAInf.va.model <- function(rho) {
+update.ARA1 <- function(obj) {
+	obj$vam$cache$Vp <- (1-obj$rho)*(virtual.age(obj$vam$cache$mod,obj$vam$Time[obj$vam$cache$k])-obj$vam$cache$Vp) + obj$vam$cache$Vp
+}
+
+virtual.age.ARA1 <- function(obj,time) {
+	obj$vam$cache$Vp+time-obj$vam$Time[obj$vam$cache$k]
+}
+
+inverse.virtual.age.ARA1 <- function(obj,time) {
+	time+obj$vam$Time[obj$vam$cache$k]-obj$vam$cache$Vp
+}
+
+ARAInf.va.model <- function(rho,vam) {
 	#Vp history not needed: the current updates from the previous one!
-	obj <- list(
-			rho=rho,
-	 		#Vp=expression(Vp <- (1-rho)*(Time[k]-Time[k-1]+Vp)), # Vp[k] <- (1-rho)*(Time[k]-Time[k-1]+Vp[k-1])
-			#V=expression(Vp+time-Time[k]),
-			#VInv=expression(time+Time[k]-Vp)
-			Vp=function(V,Vp,rho) (1-rho)*V,
-			#Trop specifique aux ARA: Vp=function(k,Time,Vp,rho)  (1-rho)*(Time[k]-Time[k-1]+Vp), # Vp[k] <- (1-rho)*(Time[k]-Time[k-1]+Vp[k-1])
-			V=function(time,k,Time,Vp,rho) Vp+time-Time[k],
-			VInv=function(time,k,Time,Vp,rho) time+Time[k]-Vp
-		)
+	obj <- list(rho=rho,vam=vam)
 	class(obj) <- c("ARAInf","va.model")
 	obj
 }
 
-### type=1 or Inf
-# ara.va.model <- function(typeC=1,rhoC,typeP=1,rhoP) {
-# 	env <- new.env()
-# 	env$rhoC <- rhoC
-# 	env$rhoP <- rhoP
-# 	env$typeC <- typeC
-# 	env$typeP <- typeP
-# 	#VPlus history not needed! Only the last previous one required!
-# 	obj <- list(
-# 			env=env,
-# 	 		VpInf=expression(Vp[k] <- ((Type[k] < 0)*(1-rhoC) +  (Type[k] > 0) * (1-rhoP[Type[k]]))*(Time[k]-Time[k-1]+Vp[k-1])),
-# 			VpOne=expression(Vp[k] <- ((Type[k] < 0)* (Type[k] < 0)*(1-rhoC) +  (Type[k] > 0) * (1-rhoP[Type[k]]))*(Time[k]-Time[k-1])+Vp[k-1]),
-# 			V=expression(Vp[k]+time-Time[k]),
-# 			VInv=expression(time+Time[k]-Vp[k])
-# 		)
-# 	class(obj) <- c("ara","va.model")
-# 	obj
-# }
+update.ARAInf <- function(obj) {
+	obj$vam$cache$Vp <- (1-obj$rho)*virtual.age(obj$vam$cache$mod,obj$vam$Time[obj$vam$cache$k])
+}
+
+virtual.age.ARAInf <-  virtual.age.ARA1
+
+inverse.virtual.age.ARAInf <-  inverse.virtual.age.ARA1
+
 
