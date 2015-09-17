@@ -18,19 +18,19 @@ update.ARA1 <- function(obj,with.gradient=FALSE) {
 	# next step
 	obj$vam$cache$k <- obj$vam$cache$k + 1
 	# At T(k)
-	obj$vam$cache$Vright <- obj$vam$cache$Vright + (1-obj$rho)*(dV <-(obj$vam$cache$Vleft-obj$vam$cache$Vright))
+	obj$vam$cache$Vright <- obj$vam$cache$Vright + (1-obj$rho)*(dVlr <-(obj$vam$cache$Vleft-obj$vam$cache$Vright))
 	if(with.gradient) {
 		# only the rho parameters
 		#obj$vam$cache$dVright <- obj$vam$cache$dVright + rep(0,1+length(obj$vam$vam.PM$models))
 		i <- match(obj$id,seq(obj$vam$vam.PM$models),nomatch=0)+1
-		obj$vam$cache$dVright[i] <- obj$vam$cache$dVright[i] - dV
+		obj$vam$cache$dVright[i] <- obj$vam$cache$dVright[i] - dVlr
 	}
 	# save old model
 	obj$cache$mod <- obj
 }
 
 virtual.age.ARA1 <- function(obj,time) {
-	obj$vam$cache$Vright+time-obj$vam$data$Time[obj$vam$cache$k]
+	max(0.0000001,obj$vam$cache$Vright+time-obj$vam$data$Time[obj$vam$cache$k])
 }
 
 virtual.age.derivative.ARA1 <- function(obj,time) {
@@ -55,7 +55,7 @@ update.ARAInf <- function(obj,with.gradient=FALSE) {
 	obj$vam$cache$Vright <- (1-obj$rho) * obj$vam$cache$Vleft
 	if(with.gradient) {
 		# only with respect to the rho parameters (not with respect to beta)
-		obj$vam$cache$dVright <- (1-obj$rho)*obj$vam$cache$dVright
+		obj$vam$cache$dVright <- (1-obj$rho) * obj$vam$cache$dVright
 		i<- match(obj$id,seq(obj$vam$vam.PM$models),nomatch=0)+1
 		obj$vam$cache$dVright[i] <-  obj$vam$cache$dVright[i] - obj$vam$cache$Vleft
 	}

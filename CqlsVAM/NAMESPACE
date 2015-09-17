@@ -8,3 +8,5 @@ exportPattern(".")
 #   lmer.cqls,
 #  	lm.cqls
 # )
+
+import(Rcpp)

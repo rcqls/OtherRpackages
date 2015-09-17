@@ -128,6 +128,7 @@ init.mle.vam <- function(obj,with.gradient=FALSE) {
 contrast.update.mle.vam <- function(obj,with.gradient=FALSE) {
 	update.Vleft.vam(obj,with.gradient)
 	obj$cache$S1 <- obj$cache$S1 + (cummulative.density(obj$vam.CM[[1]]$family,obj$cache$Vleft)) - (cummulative.density(obj$vam.CM[[1]]$family,obj$cache$Vright))
+	if(is.nan(obj$cache$hVleft) || obj$cache$hVleft<=0) print(list("hVleft",obj$cache$hVleft))
 	obj$cache$S2 <- obj$cache$S2 + log(obj$cache$hVleft <- density(obj$vam.CM[[1]]$family,obj$cache$Vleft))*((obj$data$Type[obj$cache$k+1]<0)->obj$cache$indCM)
 }
 
@@ -172,6 +173,7 @@ contrast.mle.vam <- function(obj,param) {
 		update(mod)
 	}
 	# log-likelihood (at constant)
+	print(list(param,-log(obj$cache$S1) * obj$cache$S3 + obj$cache$S2))
 	-log(obj$cache$S1) * obj$cache$S3 + obj$cache$S2
 }
 
@@ -188,6 +190,7 @@ gradient.mle.vam <- function(obj,param) {
 		update(mod,with.gradient=TRUE)
 	}
 	# return gradient
+	print(list(param,-obj$cache$dS1/obj$cache$S1 * obj$cache$S3 + obj$cache$dS2))
 	-obj$cache$dS1/obj$cache$S1 * obj$cache$S3 + obj$cache$dS2
 }
 
@@ -204,9 +207,9 @@ run.mle.vam<-function(obj,par0,fixed,method=NULL,verbose=TRUE,...) {
 	## fixed and functions stuff!
 	if(missing(fixed)) fixed<-rep(FALSE,length(param))
 	else if(is.numeric(fixed)) {
-	fixedInd<-fixed
-	fixed<-rep(FALSE,length(param))
-	fixed[fixedInd]<-TRUE
+		fixedInd<-fixed
+		fixed<-rep(FALSE,length(param))
+		fixed[fixedInd]<-TRUE
 	}
 
 	fn<-function(par) {
@@ -219,7 +222,7 @@ run.mle.vam<-function(obj,par0,fixed,method=NULL,verbose=TRUE,...) {
  
 	gr <- function(par) {
 	    param[!fixed]<-par
-	    -gradient.mle.vam(obj,param)[!fixed]
+	    -c(0,gradient.mle.vam(obj,param))[!fixed]
 	}
   
   ## optim stuff!
@@ -235,9 +238,10 @@ run.mle.vam<-function(obj,par0,fixed,method=NULL,verbose=TRUE,...) {
   if(verbose) print(res)
 
   ## save stuff
+  obj$fixed <- fixed
   obj$optim<-res
   obj$par<-res$par
-  res$par #do not forget to save the results in Interaction object!
+  res$par
 }
 
 update.Vleft.vam <- function(obj,with.gradient=FALSE) {
@@ -248,7 +252,7 @@ update.Vleft.vam <- function(obj,with.gradient=FALSE) {
 
 # for both sim and mle
 
-parse.vam.formula <- function(obj,formula) {
+parse.vam.formula <- function(obj,formula,Rcpp.mode=FALSE) {
 	if(formula[[1]] != as.name("~")) stop("Argument has to be a formula")
 	if(length(formula) == 2) {
 		response <- NULL
@@ -272,7 +276,7 @@ parse.vam.formula <- function(obj,formula) {
 				policy[[1]] <- as.name(paste0(as.character(policy[[1]]),".maintenance.policy"))
 			}
 			# TODO: add obj as argument of policy when needed
-			policy <- eval(policy)
+			if(!Rcpp.mode) policy <- eval(policy)
 			# PMs
 			pm <- pm[[2]]
 			# parser for pm
@@ -281,7 +285,7 @@ parse.vam.formula <- function(obj,formula) {
 					pm[[1]] <- as.name(paste0(as.character(pm[[1]]),".va.model"))
 				}
 				pm[[3]] <- as.name("obj")
-				eval(pm)
+				if(Rcpp.mode) pm else eval(pm)
 			}
 			cpt.pms <- 0
 			while(pm[[1]] == as.name("+") ) {
@@ -310,7 +314,7 @@ parse.vam.formula <- function(obj,formula) {
 			cm[[1]] <- as.name(paste0(as.character(cm[[1]]),".va.model"))
 		}
 		cm[[length(cm)+1]] <- as.name("obj")
-		list(model=eval(cm),family=eval(family))
+		if(Rcpp.mode) list(model=cm,family=family) else list(model=eval(cm),family=eval(family))
 	}
 	cpt.cms <- 0
 	while( cm[[1]] == as.name("+") ) {
@@ -321,15 +325,25 @@ parse.vam.formula <- function(obj,formula) {
 	}
 	cms[[cpt.cms <- cpt.cms + 1]] <- parse.cm(cm)
 
+	if(Rcpp.mode) {
+		list(
+			response=response,
+			cms=cms[rev(seq(cms))],
+			pms=pms[rev(seq(pms))],
+			pms.policy=policy
+		)
 	
-	# update the object with CMs and PMs
-	obj$vam.CM <- cms[rev(seq(cms))]
-	obj$vam.PM <- list(models=pms[rev(seq(pms))],policy=policy)
-	# for matching purpose
-	obj$vam.CM[[1]]$model$id <-0
-	for(i in seq(obj$vam.PM$models)) obj$vam.PM$models[[i]]$id <- i 
-	# return response
-	response # NULL for sim 
+	} else { 
+	
+		# update the object with CMs and PMs
+		obj$vam.CM <- cms[rev(seq(cms))]
+		obj$vam.PM <- list(models=pms[rev(seq(pms))],policy=policy)
+		# for matching purpose
+		obj$vam.CM[[1]]$model$id <-0
+		for(i in seq(obj$vam.PM$models)) obj$vam.PM$models[[i]]$id <- i 
+		# return response
+		response # NULL for sim
+	} 
 }
 
 
