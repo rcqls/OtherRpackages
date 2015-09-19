@@ -118,6 +118,7 @@ init.mle.vam <- function(obj,with.gradient=FALSE) {
 	obj$cache$S1 <- 0
 	obj$cache$S2 <- 0
 	obj$cache$S3 <- sum(obj$data$Type<0)
+	obj$cache$hVleft <- 0
 	if(with.gradient) {
 		obj$cache$dVright <- rep(0,1+length(obj$vam.PM)) #not with respect to beta
 		obj$cache$dS1 <- rep(0,2+length(obj$vam.PM))
@@ -251,7 +252,15 @@ update.Vleft.vam <- function(obj,with.gradient=FALSE) {
 
 
 mle.vam.cpp <- function(formula,data) {
-
+	obj <- new.env()
+	model <- parse.vam.formula(NULL,formula,Rcpp.mode=TRUE)
+	response <- model$response
+	data <- data.frame(Time=c(0,data[[response[1]]]),Type=c(1,data[[response[2]]]))
+	# todo: scale to take from Weibull and replace alpha with 1 in the weibull ????
+	obj$rcpp <- new(MLEVamCpp,model,data)
+	attr(obj,"formula") <- formula
+	class(obj) <- "mle.vam.cpp"
+	obj
 }
 
 # for both sim and mle

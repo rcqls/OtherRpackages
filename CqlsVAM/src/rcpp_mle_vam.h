@@ -19,13 +19,44 @@ public:
 
 
     NumericVector contrast(NumericVector param) {
-    	NumericVector res;
+    	NumericVector res(1);
+    	init_mle_vam(false);
+		cache->set_params(param);
+		int n=(cache->time).size();
+		while(cache->k < n) {
+			contrast_update(false);
+			// previous model for the next step
+			int type=cache->type[cache->k + 1 ];
+			if(type < 0) type=0;
+			//cache->indMode = (type < 0 ? 0 : type);
+			cache->models->at(type)->update(false);
+		}
+		// log-likelihood (at constant)
+		
+		res[0]=-log(cache->S1) * cache->S3 + cache->S2;
     	return res;
     }
 
     NumericVector gradient(NumericVector param) {
-    	NumericVector res;
+    	NumericVector res(cache->nbPM + 2);
+    	init_mle_vam(true);
+    	cache->set_params(param);
+    	int n=(cache->time).size();
+    	while(cache->k < n) {
+    		gradient_update();
+    		int type=cache->type[cache->k + 1 ];
+			if(type < 0) type=0;
+			//cache->indMode = (type < 0 ? 0 : type);
+			cache->models->at(type)->update(true);
+    	}
+    	for(int i=0;i<cache->nbPM + 2;i++) {
+    		res[i] = -cache->dS1[i]/cache->S1 * cache->S3 + cache->dS2[i];
+    	}
     	return res;
+    }
+
+    VamCache* get_cache() {
+    	return cache;
     }
 
     VamCache* cache;
@@ -33,14 +64,14 @@ public:
 private:
 
     void update_Vleft(bool with_gradient) {
-    	cache->Vleft =(cache->models->at(cache->modInd))->virtual_age(cache->time[cache->k+1]);
-		if(with_gradient) cache->dVleft=(cache->models->at(cache->modInd))->virtual_age_derivative(cache->time[cache->k+1]);
+    	cache->Vleft =(cache->models->at(cache->idMod))->virtual_age(cache->time[cache->k+1]);
+		if(with_gradient) cache->dVleft=(cache->models->at(cache->idMod))->virtual_age_derivative(cache->time[cache->k+1]);
     }
 
     void init_mle_vam(bool with_gradient) {
     	cache->Vright = 0;
     	cache->k=0;
-    	cache->modInd=0;
+    	cache->idMod=0;
     	cache->S1 = 0;
     	cache->S2 = 0;
     	cache->S3 = 0;for(int i=0;i<cache->type.size();i++) if(cache->type[i] < 0) (cache->S3) += 1; //TO COMPUTE from cache->type
@@ -59,23 +90,26 @@ private:
     void contrast_update(bool with_gradient) {
     	update_Vleft(with_gradient);
     	cache->hVleft=cache->family->density(cache->Vleft);
-    	cache->indCM = ((cache->type)[(cache->k) + 1] < 0 ? 1.0 : 0.0);
-
+    	cache->indType = ((cache->type)[(cache->k) + 1] < 0 ? 1.0 : 0.0);
+    	printf("HVleft:%d,%lf,%lf\n",cache->k,cache->Vleft,cache->family->cummulative_density(cache->Vleft));
+    	printf("HVright:%lf,%lf\n",cache->Vright,cache->family->cummulative_density(cache->Vright));
+    	printf("S1:%lf\n",cache->S1);
+    	printf("indType,S2,hVleft:%lf,%lf,%lf\n",cache->indType,cache->S1,cache->hVleft);
     	cache->S1 += cache->family->cummulative_density(cache->Vleft) - cache->family->cummulative_density(cache->Vright);
-    	cache->S2 += log(cache->hVleft)* cache->indCM;
+    	cache->S2 += log(cache->hVleft)* cache->indType;
     	//for(int i=0;i<(cache->nbPM)+2;i++) cache->dS1[i] += cdVleft[i] - cdVright[i];
     	//cache->dS1 += (models->at(0))
     }
 
-    void gradient_update(bool with_gradient) {
-    	contrast_update(with_gradient);
+    void gradient_update() {
+    	contrast_update(true);
     	cache->dS1[0] += cache->family->cummulative_density_param_derivative(cache->Vleft) - cache->family->cummulative_density_param_derivative(cache->Vright);
-    	cache->dS2[0] += cache->family->density_param_derivative(cache->Vleft)/cache->hVleft*cache->indCM ;
+    	cache->dS2[0] += cache->family->density_param_derivative(cache->Vleft)/cache->hVleft*cache->indType ;
     	double hVright=cache->family->density(cache->Vright);
     	double dhVleft=cache->family->density_derivative(cache->Vleft);
     	for(int i=0;i<(cache->nbPM)+1;i++) {
     		cache->dS1[i+1] += cache->hVleft * cache->dVleft[i] - hVright * cache->dVright[i];
-    		cache->dS2[i+1] +=  dhVleft * cache->dVleft[i]/cache->hVleft * cache->indCM;
+    		cache->dS2[i+1] +=  dhVleft * cache->dVleft[i]/cache->hVleft * cache->indType;
     	}
     }
 

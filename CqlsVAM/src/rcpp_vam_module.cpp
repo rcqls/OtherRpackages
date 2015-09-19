@@ -3,8 +3,8 @@
 
 RCPP_MODULE(vam_module) {
 	class_<VamCache>("VamCacheCpp")
+	.constructor<List>()
 	.constructor<List,List>()
-	.constructor<List,List,List>()
 	.field( "time", &VamCache::time, "time" )
 	.field( "type", &VamCache::type, "type" )
 	.method( "get", &VamCache::get, "get many informations" )
@@ -19,6 +19,7 @@ RCPP_MODULE(vam_module) {
 
     class_<MLEVam>( "MLEVamCpp" )
     .constructor<List,List>()
+    .method("cache",&MLEVam::get_cache,"cache accessor")
     .method("contrast",&MLEVam::contrast,"compute contrast")
     .method("gradient",&MLEVam::gradient,"compute gradient")
     ;

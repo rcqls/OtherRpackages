@@ -45,13 +45,19 @@ public:
  
     virtual void update(bool with_gradient) = 0;
 
-    virtual double virtual_age(double x) = 0;
+    virtual double virtual_age(double time) = 0;
 
     virtual double* virtual_age_derivative(double x) = 0;
 
-    virtual double virtual_age_inverse(double x) = 0;
+    virtual double virtual_age_inverse(double time) = 0;
 
     VamCache* cache;
+
+    void set_id(int id_) {
+    	id=id_;
+    }
+
+    int id;
 
 };
 
@@ -80,9 +86,9 @@ public:
     double* virtual_age_derivative(double x);
 
     double virtual_age_inverse(double x);
-private:
 
-	double rho;
+private:
+    double rho;
 
 };
 

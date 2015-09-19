@@ -10,12 +10,12 @@ class VamModelList;
 class VamCache {
 public:
 
-	VamCache(List model_,List family_) {
-        init(model_,family_);
+	VamCache(List model_) {
+        init(model_);
     };
 
-	VamCache(List model_,List family_,List data) {
-		init(model_,family_);
+	VamCache(List model_,List data) {
+		init(model_);
 		time = data["Time"]; type = data["Type"];
 	};
 
@@ -27,11 +27,11 @@ public:
 		//delete models;
 	};
 
-	int k,nbPM,modInd;
+	int k,nbPM,idMod;
 
 	NumericVector time, type;
 
-	double S1, S2, S3, indCM;
+	double S1, S2, S3, indType;
 
 	double Vleft, Vright, hVleft;
 
@@ -46,7 +46,7 @@ public:
 		k=0;
 		Vleft=0;
 		Vright=0;
-		indCM=0;hVleft=0;
+		indType=0;hVleft=0;
 		dS1[0]=0;dS2[0]=0;
 		for (i=0;i<nbPM+1;i++) {
 			dVright[i]=0;
@@ -88,7 +88,7 @@ private:
 
     void set_family(List family_);
 
-	void init(List model_,List family_);
+	void init(List model_);
 };
 
 #endif
