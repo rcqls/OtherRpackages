@@ -250,6 +250,10 @@ update.Vleft.vam <- function(obj,with.gradient=FALSE) {
 } 
 
 
+mle.vam.cpp <- function(formula,data) {
+
+}
+
 # for both sim and mle
 
 parse.vam.formula <- function(obj,formula,Rcpp.mode=FALSE) {
@@ -326,11 +330,32 @@ parse.vam.formula <- function(obj,formula,Rcpp.mode=FALSE) {
 	cms[[cpt.cms <- cpt.cms + 1]] <- parse.cm(cm)
 
 	if(Rcpp.mode) {
+		convert.cm <- function(cm) {
+
+			list(
+				model=list(
+					name=as.character(cm$model[[1]]),
+					params=sapply(cm$model[2:(length(cm$model)-1)],as.vector)
+				),
+				family=list(
+					name=as.character(cm$family[[1]]),
+					params=sapply(cm$family[-1],as.vector)
+				)
+			)
+		}
+		convert.pm <- function(pm) {
+			list(
+				name=as.character(pm[[1]]),
+				params=sapply(pm[2:(length(pm)-1)],as.vector)
+			)
+
+		}
+		cms <- convert.cm(cms[[1]])
 		list(
 			response=response,
-			cms=cms[rev(seq(cms))],
-			pms=pms[rev(seq(pms))],
-			pms.policy=policy
+			models=c(list(cms$model),lapply(pms[rev(seq(pms))],convert.pm)),
+			family=cms$family,
+			pm.policy=policy
 		)
 	
 	} else { 

@@ -9,24 +9,16 @@ class SimVam {
 
 public:
 
-    SimVam(List models_) {
-        set_models(models_);
-        cache=new VamCache(2);
+    SimVam(VamCache* cache_) {
+        cache=cache_;
     };
 
     ~SimVam() {
-        delete cache;
     };
 
-    void set_models(List models_) {
-        models=new VamModelList(models_,cache);
-    }
-
-    VamCache* cache;
 
 private:
-
-    VamModelList* models;
+    VamCache* cache;
 
 };
 

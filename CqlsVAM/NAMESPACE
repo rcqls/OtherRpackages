@@ -1,4 +1,4 @@
-# Remove the previous line if you edit this file
+useDynLib(CqlsVAM)
 
 # Export all names
 exportPattern(".")

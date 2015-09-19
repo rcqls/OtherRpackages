@@ -1,60 +1,35 @@
 #ifndef RCPP_VAM_MODEL_H
 #define RCPP_VAM_MODEL_H
 #include <Rcpp.h>
+#include "rcpp_vam_cache.h"
 
 using namespace Rcpp ;
 
-class VamCache {
+//Forward declarations
+class VamModel;
+
+//Effective declarations
+class VamModelList {//List of ModelBase (heterogeneous terms) 
 public:
+    VamModelList(List models_,VamCache* cache);
 
-	VamCache(int nbCM_) {
-		nbCM=nbCM_;
-		dVright=new double[nbCM+1];
-		dVleft=new double[nbCM+1];
-		dS1=new double[nbCM+2];
-		dS2=new double[nbCM+2];
-	};
+    ~VamModelList();
 
-	VamCache(List data,int nbCM_) {
-		time = data["Time"]; type = data["Type"];
-		nbCM=nbCM_;
-		dVright=new double[nbCM+1];
-		dVleft=new double[nbCM+1];
-		dS1=new double[nbCM+2];
-		dS2=new double[nbCM+2];
-	};
+    VamModel* at(int i) {
+    	return model_list[i];
+    }
 
-	~VamCache() {
-		delete[] dVright;
-		delete[] dVleft;
-		delete[] dS1;
-		delete[] dS2;
-	};
+    int size() {
+    	return model_list.size();
+    }
 
-	int k,nbCM;
 
-	NumericVector time, type;
+protected:
 
-	double Vleft, Vright, dS3;
-
-	double *dVleft, *dVright, *dS1, *dS2;
-
-	void initMLE() {
-		int i;
-		k=0;
-		Vleft=0;
-		Vright=0;
-		dS3=0;
-		dS1[0]=0;
-		for (i=0;i<nbCM+1;i++) {
-			dVright[i]=0;
-			dVleft[i]=0;
-			dS1[i+1]=0;
-			dS2[i+1]=0;
-		}
-		
-	};
+    std::vector<VamModel*> model_list; //model list
+     
 };
+
 
 class VamModel {
 public:
@@ -66,13 +41,13 @@ public:
 
     virtual NumericVector get_params() = 0;
 
-    virtual  void set_params(NumericVector pars) = 0;
+    virtual  void set_params(double) = 0;
  
     virtual void update(bool with_gradient) = 0;
 
     virtual double virtual_age(double x) = 0;
 
-    virtual double virtual_age_derivative(double x) = 0;
+    virtual double* virtual_age_derivative(double x) = 0;
 
     virtual double virtual_age_inverse(double x) = 0;
 
@@ -94,27 +69,17 @@ public:
     	return out;
     }
 
-    void set_params(NumericVector pars) {
-    	rho=pars[0];
+    void set_params(double par) {
+    	rho=par;
     }
 
-    void update(bool with_gradient) {
+    void update(bool with_gradient); 
 
-    }
+    double virtual_age(double time);
 
-    double virtual_age(double time) {
-		//max(0.0000001,obj$vam$cache$Vright+time-obj$vam$data$Time[obj$vam$cache$k])
-    	return cache -> Vright + time  - cache->time[cache->k];
-    }
+    double* virtual_age_derivative(double x);
 
-    double virtual_age_derivative(double x) {
-    	return 0;
-    }
-
-    double virtual_age_inverse(double x) {
-    	return 0;
-    }
-
+    double virtual_age_inverse(double x);
 private:
 
 	double rho;
@@ -135,26 +100,17 @@ public:
     	return out;
     }
 
-    void set_params(NumericVector pars) {
-    	rho=pars[0];
+    void set_params(double par) {
+    	rho=par;
     }
 
-    void update(bool with_gradient) {
+    void update(bool with_gradient);
 
-    }
+    double virtual_age(double time);
 
-    double virtual_age(double time) {
-		//max(0.0000001,obj$vam$cache$Vright+time-obj$vam$data$Time[obj$vam$cache$k])
-    	return cache -> Vright + time  - cache->time[cache->k];
-    }
+    double* virtual_age_derivative(double x);
 
-    double virtual_age_derivative(double x) {
-    	return 0;
-    }
-
-    double virtual_age_inverse(double x) {
-    	return 0;
-    }
+    double virtual_age_inverse(double x);
 
 private:
 
@@ -162,43 +118,6 @@ private:
 
 };
 
-class VamModelList {//List of ModelBase (heterogeneous terms) 
-public:
-    VamModelList(List models_,VamCache* cache) {
-
-        for(
-            List::iterator lit=models_.begin();
-            lit != models_.end();
-            ++lit
-        ) {
-        	VamModel*  vam=new ARA1(1.0,cache);
-            model_list.push_back(vam);
-        }
-    }
-
-    ~VamModelList() {
-    	for(
-    		std::vector<VamModel*>::iterator vit=model_list.begin();
-    		vit != model_list.end();
-            ++vit
-        ) {
-    		delete *vit;
-    	}
-
-    }
-
-    VamModel* operator[](const int i) {
-    	return model_list[i];
-    }
-
-protected:
-
-    std::vector<VamModel*> model_list; //model list
-     
-};
-
-
-
-
+VamModel* newVamModel(List model,VamCache* cache);
 
 #endif //RCPP_VAM_MODEL_H
