@@ -2,6 +2,7 @@
 #define RCPP_VAM_CACHE_H
 #include <Rcpp.h>
 #include "rcpp_family_model.h"
+#include "rcpp_maintenance_policy.h"
 
 using namespace Rcpp ;
 
@@ -40,6 +41,8 @@ public:
 	VamModelList* models;
 
 	FamilyModel* family;
+
+	MaintenancePolicy* maintenance_policy;
 
 	void initMLE() {
 		int i;
@@ -82,11 +85,14 @@ public:
 
     void set_params(NumericVector pars);
 
+    void update_Vleft(bool with_gradient);
 
 private:
 	void set_models(List models_);
 
     void set_family(List family_);
+
+    void set_maintenance_policy(List maintenance_policy_);
 
 	void init(List model_);
 };

@@ -22,7 +22,7 @@ public:
     	NumericVector res(1);
     	init_mle_vam(false);
 		cache->set_params(param);
-		int n=(cache->time).size();
+		int n=(cache->time).size() - 1;
 		while(cache->k < n) {
 			contrast_update(false);
 			// previous model for the next step
@@ -41,7 +41,7 @@ public:
     	NumericVector res(cache->nbPM + 2);
     	init_mle_vam(true);
     	cache->set_params(param);
-    	int n=(cache->time).size();
+    	int n=(cache->time).size() - 1;
     	while(cache->k < n) {
     		gradient_update();
     		int type=cache->type[cache->k + 1 ];
@@ -59,19 +59,14 @@ public:
     	return cache;
     }
 
-    VamCache* cache;
-
 private:
 
-    void update_Vleft(bool with_gradient) {
-    	cache->Vleft =(cache->models->at(cache->idMod))->virtual_age(cache->time[cache->k+1]);
-		if(with_gradient) cache->dVleft=(cache->models->at(cache->idMod))->virtual_age_derivative(cache->time[cache->k+1]);
-    }
+	VamCache* cache;
 
     void init_mle_vam(bool with_gradient) {
-    	cache->Vright = 0;
+    	cache->Vright = 0; //100000.;
     	cache->k=0;
-    	cache->idMod=0;
+    	cache->idMod=0; //id of current model
     	cache->S1 = 0;
     	cache->S2 = 0;
     	cache->S3 = 0;for(int i=0;i<cache->type.size();i++) if(cache->type[i] < 0) (cache->S3) += 1; //TO COMPUTE from cache->type
@@ -88,13 +83,13 @@ private:
     }
 
     void contrast_update(bool with_gradient) {
-    	update_Vleft(with_gradient);
+    	cache->update_Vleft(with_gradient);
     	cache->hVleft=cache->family->density(cache->Vleft);
     	cache->indType = ((cache->type)[(cache->k) + 1] < 0 ? 1.0 : 0.0);
-    	printf("HVleft:%d,%lf,%lf\n",cache->k,cache->Vleft,cache->family->cummulative_density(cache->Vleft));
-    	printf("HVright:%lf,%lf\n",cache->Vright,cache->family->cummulative_density(cache->Vright));
-    	printf("S1:%lf\n",cache->S1);
-    	printf("indType,S2,hVleft:%lf,%lf,%lf\n",cache->indType,cache->S1,cache->hVleft);
+    	// printf("HVleft:%d,%lf,%lf\n",cache->k,cache->Vleft,cache->family->cummulative_density(cache->Vleft));
+    	// printf("HVright:%lf,%lf\n",cache->Vright,cache->family->cummulative_density(cache->Vright));
+    	// printf("S1:%lf\n",cache->S1);
+    	// printf("indType,S2,hVleft:%lf,%lf,%lf\n",cache->indType,cache->S1,cache->hVleft);
     	cache->S1 += cache->family->cummulative_density(cache->Vleft) - cache->family->cummulative_density(cache->Vright);
     	cache->S2 += log(cache->hVleft)* cache->indType;
     	//for(int i=0;i<(cache->nbPM)+2;i++) cache->dS1[i] += cdVleft[i] - cdVright[i];
@@ -107,10 +102,14 @@ private:
     	cache->dS2[0] += cache->family->density_param_derivative(cache->Vleft)/cache->hVleft*cache->indType ;
     	double hVright=cache->family->density(cache->Vright);
     	double dhVleft=cache->family->density_derivative(cache->Vleft);
+    	//printf("k:%d,hVright:%lf,dhVleft:%lf,indType:%lf\n",cache->k,hVright,dhVleft,cache->indType);
     	for(int i=0;i<(cache->nbPM)+1;i++) {
     		cache->dS1[i+1] += cache->hVleft * cache->dVleft[i] - hVright * cache->dVright[i];
+    		//printf("dS1[%d]=(%lf,%lf,%lf),%lf,",i+1,cache->hVleft,cache->dVleft[i],cache->dVright[i],cache->dS1[i+1]);
     		cache->dS2[i+1] +=  dhVleft * cache->dVleft[i]/cache->hVleft * cache->indType;
+    		//printf("dS2[%d]=%lf,",i+1,cache->dS2[i+1]);
     	}
+    	//printf("\n");
     }
 
 };

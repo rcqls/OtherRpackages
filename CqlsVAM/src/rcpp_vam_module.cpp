@@ -13,9 +13,11 @@ RCPP_MODULE(vam_module) {
     .method("set_params",&VamCache::set_params,"set params")
 	;
 
-    //class_<SimVam>( "SimVamCpp" )
-    //.constructor<List>()
-    //;
+    class_<SimVam>( "SimVamCpp" )
+    .constructor<List>()
+    .method("cache",&SimVam::get_cache,"cache accessor")
+    .method("simulate",&SimVam::simulate,"simulate")
+    ;
 
     class_<MLEVam>( "MLEVamCpp" )
     .constructor<List,List>()
@@ -33,5 +35,15 @@ RCPP_MODULE(vam_module) {
     .method("cummulative_density_param_derivative",&FamilyModel::cummulative_density_param_derivative,"cummulative density derivative with respect to beta")
     ;
 
-    function( "newFamilyModel", &newFamilyModel );
+    function( "newMaintenancePolicy", &newMaintenancePolicy );
+
+    class_<MaintenancePolicy>("MaintenancePolicyCpp")
+    .method("update",&MaintenancePolicy::update,"update")
+    .method("get_params",&MaintenancePolicy::get_params,"get params")
+    .method("set_params",&MaintenancePolicy::set_params,"set params")
+    ;
+
+    function( "newMaintenancePolicy", &newMaintenancePolicy );
+
+
 }

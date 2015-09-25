@@ -24,6 +24,13 @@ void VamCache::set_params(NumericVector pars) {
 	}
 }
 
+void VamCache::update_Vleft(bool with_gradient) {
+	/*if(cache->k < 10) printf("Vleft:%lf\n", cache->Vleft);*/
+	Vleft =(models->at(idMod))->virtual_age(time[k+1]);
+	//printf("Vleft:%lf\n", cache->Vleft);
+	if(with_gradient) dVleft=(models->at(idMod))->virtual_age_derivative(time[k+1]);
+}
+
 
 void VamCache::set_models(List models_) {
     models=new VamModelList(models_,this);
@@ -33,13 +40,19 @@ void VamCache::set_family(List family_) {
 	family=newFamilyModel(family_);
 }
 
+void VamCache::set_maintenance_policy(List maintenance_policy_) {
+	maintenance_policy=newMaintenancePolicy(maintenance_policy_);
+};
+
 void VamCache::init(List model_) {
 	List models_=model_["models"];
 	List family_=model_["family"];
+	List maintenance_policy_=model_["pm.policy"];
     set_models(models_);
 	nbPM=models->size()-1;
 	
 	set_family(family_);
+	set_maintenance_policy(maintenance_policy_);
 
 	S1=0;S2=0;S3=0;
 	Vleft=0;Vright=0;

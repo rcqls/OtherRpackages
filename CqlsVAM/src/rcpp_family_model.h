@@ -49,7 +49,7 @@ public:
     }
 
     double density(double x) {
-    	return alpha*beta*pow(x,beta-1);
+    	return (x<=0 ? 0 : alpha*beta*pow(x,beta-1));
     }
 
 	double cummulative_density(double x) {
@@ -62,7 +62,7 @@ public:
 	}
 
 	double density_derivative(double x) {
-		return alpha*beta*(beta-1)*pow(x,beta-2);
+		return (x<=0 ? 0 : alpha*beta*(beta-1)*pow(x,beta-2));
 	}
 
 	double density_param_derivative(double x) {

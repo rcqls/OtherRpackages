@@ -19,7 +19,7 @@ params.Weibull.family.cm <- function(obj,param) {
 	}
 }
 
-density.Weibull.family.cm <- function(obj,t) obj$alpha*obj$beta*t^(obj$beta-1)
+density.Weibull.family.cm <- function(obj,t) if(t<=0) 0 else obj$alpha*obj$beta*t^(obj$beta-1)
 
 cummulative.density.Weibull.family.cm <- function(obj,t) obj$alpha*t^obj$beta
 

@@ -58,6 +58,7 @@ void ARA1::update(bool with_gradient) {
 
 double ARA1::virtual_age(double time) {
     //max(0.0000001,obj$vam$cache$Vright+time-obj$vam$data$Time[obj$vam$cache$k])
+    //printf("virtual_age:%lf,%lf,%lf\n",cache -> Vright, time,cache->time[cache->k]);
     return cache -> Vright + time  - cache->time[cache->k];
 }
 

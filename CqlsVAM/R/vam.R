@@ -87,6 +87,19 @@ simulate.sim.vam <- function(obj, nbsim=10, stop.time = Inf,seed = NULL) {
 	res
 }
 
+sim.vam.cpp <- function(formula,data) {
+	obj <- new.env()
+	model <- parse.vam.formula(NULL,formula,Rcpp.mode=TRUE)
+	obj$rcpp <- new(SimVamCpp,model)
+	attr(obj,"formula") <- formula
+	class(obj) <- "sim.vam.cpp"
+	obj
+}
+
+simulate.sim.vam.cpp <- function(obj, nbsim=10, stop.time = Inf) {
+	obj$rcpp$simulate(nbsim)[-1,]
+}
+
 # Estimation part! The usual way in R
 
 mle.vam <- function(formula,data) {
@@ -111,7 +124,7 @@ mle.vam <- function(formula,data) {
 }
 
 init.mle.vam <- function(obj,with.gradient=FALSE) {
-	obj$cache$Vright <- 0	# useless value at init
+	obj$cache$Vright <- 0 #Inf	# useless value at init
 	obj$cache$k<- 1 # different from simulation
 	obj$cache$mod <- obj$vam.PM$models[[1]] # useless value at init
 	# the rest
@@ -129,7 +142,7 @@ init.mle.vam <- function(obj,with.gradient=FALSE) {
 contrast.update.mle.vam <- function(obj,with.gradient=FALSE) {
 	update.Vleft.vam(obj,with.gradient)
 	obj$cache$S1 <- obj$cache$S1 + (cummulative.density(obj$vam.CM[[1]]$family,obj$cache$Vleft)) - (cummulative.density(obj$vam.CM[[1]]$family,obj$cache$Vright))
-	if(is.nan(obj$cache$hVleft) || obj$cache$hVleft<=0) print(list("hVleft",obj$cache$hVleft))
+	#if(is.nan(obj$cache$hVleft) || obj$cache$hVleft<=0) print(list("hVleft",obj$cache$hVleft))
 	obj$cache$S2 <- obj$cache$S2 + log(obj$cache$hVleft <- density(obj$vam.CM[[1]]$family,obj$cache$Vleft))*((obj$data$Type[obj$cache$k+1]<0)->obj$cache$indCM)
 }
 
@@ -174,7 +187,7 @@ contrast.mle.vam <- function(obj,param) {
 		update(mod)
 	}
 	# log-likelihood (at constant)
-	print(list(param,-log(obj$cache$S1) * obj$cache$S3 + obj$cache$S2))
+	#print(list(param,-log(obj$cache$S1) * obj$cache$S3 + obj$cache$S2))
 	-log(obj$cache$S1) * obj$cache$S3 + obj$cache$S2
 }
 
@@ -191,7 +204,7 @@ gradient.mle.vam <- function(obj,param) {
 		update(mod,with.gradient=TRUE)
 	}
 	# return gradient
-	print(list(param,-obj$cache$dS1/obj$cache$S1 * obj$cache$S3 + obj$cache$dS2))
+	#print(list(param,-obj$cache$dS1/obj$cache$S1 * obj$cache$S3 + obj$cache$dS2))
 	-obj$cache$dS1/obj$cache$S1 * obj$cache$S3 + obj$cache$dS2
 }
 
@@ -247,6 +260,7 @@ run.mle.vam<-function(obj,par0,fixed,method=NULL,verbose=TRUE,...) {
 
 update.Vleft.vam <- function(obj,with.gradient=FALSE) {
 	obj$cache$Vleft <- virtual.age(obj$cache$mod,obj$data$Time[obj$cache$k+1])
+	#print(obj$cache$Vleft)
 	if(with.gradient) obj$cache$dVleft <- virtual.age.derivative(obj$cache$mod,obj$data$Time[obj$cache$k+1])
 } 
 
@@ -261,6 +275,52 @@ mle.vam.cpp <- function(formula,data) {
 	attr(obj,"formula") <- formula
 	class(obj) <- "mle.vam.cpp"
 	obj
+}
+
+run.mle.vam.cpp<-function(obj,par0,fixed,method=NULL,verbose=TRUE,...) {
+	## parameters stuff!
+	if(missing(par0))  {
+		if("par" %in% names(obj)) param <- obj$par #not the first run 
+		else param<-params(obj) #first run
+	} else if(is.null(par0)) param<-params(obj) else param<-par0
+	## fixed and functions stuff!
+	if(missing(fixed)) fixed<-rep(FALSE,length(param))
+	else if(is.numeric(fixed)) {
+		fixedInd<-fixed
+		fixed<-rep(FALSE,length(param))
+		fixed[fixedInd]<-TRUE
+	}
+
+	fn<-function(par) {
+		##print(par);print(param[!fixed])
+		param[!fixed]<-par
+		##cat("param->");print(param)
+		-obj$rcpp$contrast(param)
+	}
+
+ 
+	gr <- function(par) {
+	    param[!fixed]<-par
+	    -c(0,obj$rcpp$gradient(param))[!fixed]
+	}
+  
+  ## optim stuff!
+  if(is.null(method) || method=="fast") {
+    if(length(param[!fixed])>1) param[!fixed]<-(res <- optim(param[!fixed],fn,gr,method="Ne",...))$par
+    if(is.null(method)) res<-optim(param[!fixed],fn,gr,method="CG",...)
+  } else res<-optim(param[!fixed],fn,gr,method=method,...)
+  
+  #fixed tips
+  param[!fixed]<-res$par
+  res$par<-param
+  
+  if(verbose) print(res)
+
+  ## save stuff
+  obj$fixed <- fixed
+  obj$optim<-res
+  obj$par<-res$par
+  res$par
 }
 
 # for both sim and mle
@@ -359,12 +419,22 @@ parse.vam.formula <- function(obj,formula,Rcpp.mode=FALSE) {
 			)
 
 		}
+		convert.mp <- function(mp) {#maintenance policy
+			pars=as.list(match.call(eval(mp[[1]]),mp))[-1]
+			# default values!
+			if(is.null(pars[["from"]])) pars["from"]<-0
+			if(is.null(pars[["prob"]])) pars["prob"]<-1	
+			list(
+				name=as.character(mp[[1]]),
+				params=lapply(pars,eval)
+			)
+		}
 		cms <- convert.cm(cms[[1]])
 		list(
 			response=response,
 			models=c(list(cms$model),lapply(pms[rev(seq(pms))],convert.pm)),
 			family=cms$family,
-			pm.policy=policy
+			pm.policy=convert.mp(policy)
 		)
 	
 	} else { 
