@@ -277,12 +277,13 @@ mle.vam.cpp <- function(formula,data) {
 	obj
 }
 
+# alpha is not considered in the estimation!
 run.mle.vam.cpp<-function(obj,par0,fixed,method=NULL,verbose=TRUE,...) {
 	## parameters stuff!
 	if(missing(par0))  {
 		if("par" %in% names(obj)) param <- obj$par #not the first run 
-		else param<-params(obj) #first run
-	} else if(is.null(par0)) param<-params(obj) else param<-par0
+		else param<-params(obj)[-1] #first run
+	} else if(is.null(par0)) param<-params(obj)[-1] else param<-par0[-1]
 	## fixed and functions stuff!
 	if(missing(fixed)) fixed<-rep(FALSE,length(param))
 	else if(is.numeric(fixed)) {
@@ -295,13 +296,13 @@ run.mle.vam.cpp<-function(obj,par0,fixed,method=NULL,verbose=TRUE,...) {
 		##print(par);print(param[!fixed])
 		param[!fixed]<-par
 		##cat("param->");print(param)
-		-obj$rcpp$contrast(param)
+		-obj$rcpp$contrast(c(1,param))
 	}
 
  
 	gr <- function(par) {
 	    param[!fixed]<-par
-	    -c(0,obj$rcpp$gradient(param))[!fixed]
+	    -obj$rcpp$gradient(c(1,param))[!fixed]
 	}
   
   ## optim stuff!

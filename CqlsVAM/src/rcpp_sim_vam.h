@@ -51,7 +51,7 @@ public:
             cache->models->at(idMod)->update(false);
         }
 
-        return DataFrame::create(_["time"]=cache->time,_["type"]=cache->type);
+        return DataFrame::create(_["Time"]=cache->time,_["Type"]=cache->type);
     }
 
     VamCache* get_cache() {
