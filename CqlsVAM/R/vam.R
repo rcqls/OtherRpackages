@@ -88,16 +88,29 @@ simulate.sim.vam <- function(obj, nbsim=10, stop.time = Inf,seed = NULL) {
 }
 
 sim.vam.cpp <- function(formula,data) {
-	obj <- new.env()
-	model <- parse.vam.formula(NULL,formula,Rcpp.mode=TRUE)
-	obj$rcpp <- new(SimVamCpp,model)
-	attr(obj,"formula") <- formula
-	class(obj) <- "sim.vam.cpp"
-	obj
+	if("package:CqlsPersistentRcppObject" %in% search()) {
+		self <- newEnv(sim.vam.cpp,formula=formula)
+
+		RcppPersistentObject(self,new = {
+			model <- parse.vam.formula(NULL,self$formula,Rcpp.mode=TRUE)
+			rcpp <- new(SimVamCpp,model)
+			rcpp 
+		})
+
+		self
+	} else {
+		obj <- new.env()
+		model <- parse.vam.formula(NULL,formula,Rcpp.mode=TRUE)
+		obj$rcpp <- new(SimVamCpp,model)
+		attr(obj,"formula") <- formula
+		class(obj) <- "sim.vam.cpp"
+		obj
+	}
 }
 
-simulate.sim.vam.cpp <- function(obj, nbsim=10, stop.time = Inf) {
-	obj$rcpp$simulate(nbsim)[-1,]
+simulate.sim.vam.cpp <- function(self, nbsim=10, stop.time = Inf) {
+	rcpp <- if("package:CqlsPersistentRcppObject" %in% search()) self$rcpp() else self$rcpp
+	rcpp$simulate(nbsim)[-1,]
 }
 
 # Estimation part! The usual way in R
@@ -266,19 +279,35 @@ update.Vleft.vam <- function(obj,with.gradient=FALSE) {
 
 
 mle.vam.cpp <- function(formula,data) {
-	obj <- new.env()
-	model <- parse.vam.formula(NULL,formula,Rcpp.mode=TRUE)
-	response <- model$response
-	data <- data.frame(Time=c(0,data[[response[1]]]),Type=c(1,data[[response[2]]]))
-	# todo: scale to take from Weibull and replace alpha with 1 in the weibull ????
-	obj$rcpp <- new(MLEVamCpp,model,data)
-	attr(obj,"formula") <- formula
-	class(obj) <- "mle.vam.cpp"
-	obj
+	if("package:CqlsPersistentRcppObject" %in% search()) {
+		self <- newEnv(mle.vam.cpp,formula=formula,data=data)
+
+		RcppPersistentObject(self,new = {
+			model <- parse.vam.formula(NULL,self$formula,Rcpp.mode=TRUE)
+			response <- model$response
+			data <- data.frame(Time=c(0,self$data[[response[1]]]),Type=c(1,self$data[[response[2]]]))
+			rcpp <- new(MLEVamCpp,model,data)
+			rcpp 
+		})
+
+		self
+	} else {
+		obj <- new.env()
+		model <- parse.vam.formula(NULL,formula,Rcpp.mode=TRUE)
+		response <- model$response
+		data <- data.frame(Time=c(0,data[[response[1]]]),Type=c(1,data[[response[2]]]))
+		# todo: scale to take from Weibull and replace alpha with 1 in the weibull ????
+		obj$rcpp <- new(MLEVamCpp,model,data)
+		attr(obj,"formula") <- formula
+		class(obj) <- "mle.vam.cpp"
+		obj
+	}
 }
 
 # alpha is not considered in the estimation!
 run.mle.vam.cpp<-function(obj,par0,fixed,method=NULL,verbose=TRUE,...) {
+	rcpp <- if("package:CqlsPersistentRcppObject" %in% search()) obj$rcpp() else obj$rcpp
+
 	## parameters stuff!
 	if(missing(par0))  {
 		if("par" %in% names(obj)) param <- obj$par #not the first run 
@@ -296,13 +325,13 @@ run.mle.vam.cpp<-function(obj,par0,fixed,method=NULL,verbose=TRUE,...) {
 		##print(par);print(param[!fixed])
 		param[!fixed]<-par
 		##cat("param->");print(param)
-		-obj$rcpp$contrast(c(1,param))
+		-rcpp$contrast(c(1,param))
 	}
 
  
 	gr <- function(par) {
 	    param[!fixed]<-par
-	    -obj$rcpp$gradient(c(1,param))[!fixed]
+	    -rcpp$gradient(c(1,param))[!fixed]
 	}
   
   ## optim stuff!
