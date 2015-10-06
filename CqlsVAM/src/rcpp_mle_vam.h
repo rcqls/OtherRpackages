@@ -17,6 +17,10 @@ public:
         delete cache;
     };
 
+    void set_data(List data) {
+        cache->set_data(data);
+    }
+
 
     NumericVector contrast(NumericVector param) {
     	NumericVector res(1);
@@ -53,6 +57,13 @@ public:
     		res[i] = -cache->dS1[i]/cache->S1 * cache->S3 + cache->dS2[i];
     	}
     	return res;
+    }
+
+    NumericVector get_alpha_est(NumericVector param) {
+        NumericVector res(1);
+        contrast(param); //To compute S1 and S3
+        res[0]=cache->S3/cache->S1;
+        return res;
     }
 
     VamCache* get_cache() {

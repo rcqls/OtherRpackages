@@ -24,17 +24,16 @@ public:
             //### modAV <- if(Type[k]<0) obj$vam.CM[[1]]$model else obj$vam.PM$models[[obj$data$Type[k]]]
             //# Here, obj$cache$k means k-1
             //#print(c(obj$cache$Vleft,obj$cache$Vright))
-
-            double timeCM = cache->models->at(cache->idMod)->virtual_age_inverse(cache->family->inverse_cummulative_density(cache->family->cummulative_density(cache->models->at(cache->idMod)->virtual_age(cache->time[cache->k]))-log(runif(1))[0]));
-
-            List timeAndTypePM = cache->maintenance_policy->update(cache->time[cache->k]); //# Peut-être ajout Vright comme argument de update
-
+            double timePM, timeCM = cache->models->at(cache->idMod)->virtual_age_inverse(cache->family->inverse_cummulative_density(cache->family->cummulative_density(cache->models->at(cache->idMod)->virtual_age(cache->time[cache->k]))-log(runif(1))[0]));
             int idMod;
-
-            NumericVector tmp=timeAndTypePM["time"];
-            double timePM=tmp[0];
-
-            if(timeCM < timePM) {
+            List timeAndTypePM;
+            if(cache->maintenance_policy != NULL) {
+                timeAndTypePM = cache->maintenance_policy->update(cache->time[cache->k]); //# Peut-être ajout Vright comme argument de update
+                
+                NumericVector tmp=timeAndTypePM["time"];
+                timePM=tmp[0];
+            }
+            if(cache->maintenance_policy == NULL || timeCM < timePM) {
                 cache->time[cache->k + 1]=timeCM;
                 cache->type[cache->k + 1]=-1;
                 idMod=0;
@@ -65,7 +64,7 @@ private:
     void init(int nbsim) {
         cache->Vright=0;
         cache->k=0;
-        cache->idMod=1; // 1 because of current obj$data$data$Type
+        cache->idMod=0; // Since no maintenance is possible!
         cache->time=rep(0,nbsim+1);
         cache->type= rep(1,nbsim+1);
     } 

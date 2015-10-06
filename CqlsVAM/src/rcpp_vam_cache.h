@@ -17,7 +17,7 @@ public:
 
 	VamCache(List model_,List data) {
 		init(model_);
-		time = data["Time"]; type = data["Type"];
+		set_data(data);
 	};
 
 	~VamCache() {
@@ -80,6 +80,8 @@ public:
 		}
 		return ret;
 	}
+
+	void set_data(List data);
 
 	NumericVector get_params();
 

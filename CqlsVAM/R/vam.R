@@ -91,7 +91,7 @@ sim.vam.cpp <- function(formula,data) {
 	if("package:CqlsPersistentRcppObject" %in% search()) {
 		self <- newEnv(sim.vam.cpp,formula=formula)
 
-		RcppPersistentObject(self,new = {
+		PersistentRcppObject(self,new = {
 			model <- parse.vam.formula(NULL,self$formula,Rcpp.mode=TRUE)
 			rcpp <- new(SimVamCpp,model)
 			rcpp 
@@ -282,7 +282,7 @@ mle.vam.cpp <- function(formula,data) {
 	if("package:CqlsPersistentRcppObject" %in% search()) {
 		self <- newEnv(mle.vam.cpp,formula=formula,data=data)
 
-		RcppPersistentObject(self,new = {
+		PersistentRcppObject(self,new = {
 			model <- parse.vam.formula(NULL,self$formula,Rcpp.mode=TRUE)
 			response <- model$response
 			data <- data.frame(Time=c(0,self$data[[response[1]]]),Type=c(1,self$data[[response[2]]]))
@@ -301,6 +301,15 @@ mle.vam.cpp <- function(formula,data) {
 		attr(obj,"formula") <- formula
 		class(obj) <- "mle.vam.cpp"
 		obj
+	}
+}
+
+update.mle.vam.cpp <- function(self,data) {
+	if(!missing(data)) {
+		model <- parse.vam.formula(NULL,self$formula,Rcpp.mode=TRUE)
+		response <- model$response
+		data <- data.frame(Time=c(0,data[[response[1]]]),Type=c(1,data[[response[2]]]))
+		self$rcpp()$set_data(data)
 	}
 }
 
@@ -366,11 +375,12 @@ parse.vam.formula <- function(obj,formula,Rcpp.mode=FALSE) {
 		response <- c(as.character(tmp[[2]]),as.character(tmp[[3]]))
 		cm <- formula[[3]]
 	}
+	pms <- list()
+	policy <- NULL
 	if(cm[[1]] == as.name("&")) { # there is a PM part
 		pm <- cm[[3]]
 		cm <- cm[[2]]
 		# deal with PM part
-		pms <- list()
 		if(pm[[1]] == as.name("(")) {
 			pm <- pm[[2]]
 			if(pm[[1]] != as.name("|")) stop("Need a policy to manage Preventive Maintenance")
@@ -450,14 +460,17 @@ parse.vam.formula <- function(obj,formula,Rcpp.mode=FALSE) {
 
 		}
 		convert.mp <- function(mp) {#maintenance policy
-			pars=as.list(match.call(eval(mp[[1]]),mp))[-1]
-			# default values!
-			if(is.null(pars[["from"]])) pars["from"]<-0
-			if(is.null(pars[["prob"]])) pars["prob"]<-1	
-			list(
-				name=as.character(mp[[1]]),
-				params=lapply(pars,eval)
-			)
+			if(is.null(mp)) list(name="None") 
+			else { 
+				pars=as.list(match.call(eval(mp[[1]]),mp))[-1]
+				# default values!
+				if(is.null(pars[["from"]])) pars["from"]<-0
+				if(is.null(pars[["prob"]])) pars["prob"]<-1	
+				list(
+					name=as.character(mp[[1]]),
+					params=lapply(pars,eval)
+				)
+			}
 		}
 		cms <- convert.cm(cms[[1]])
 		list(

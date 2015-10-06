@@ -31,6 +31,11 @@ void VamCache::update_Vleft(bool with_gradient) {
 	if(with_gradient) dVleft=(models->at(idMod))->virtual_age_derivative(time[k+1]);
 }
 
+void VamCache::set_data(List data){
+	time = data["Time"]; type = data["Type"];
+	printf("Address of data is %p\n", (void *)time);
+}
+
 
 void VamCache::set_models(List models_) {
     models=new VamModelList(models_,this);
@@ -42,6 +47,7 @@ void VamCache::set_family(List family_) {
 
 void VamCache::set_maintenance_policy(List maintenance_policy_) {
 	maintenance_policy=newMaintenancePolicy(maintenance_policy_);
+	if(maintenance_policy==NULL) printf("maintenance_policy is NULL\n");
 };
 
 void VamCache::init(List model_) {
