@@ -25,6 +25,9 @@ public:
 		delete[] dVleft;
 		delete[] dS1;
 		delete[] dS2;
+		delete models;
+		delete family;
+		delete maintenance_policy;
 		//delete models;
 	};
 

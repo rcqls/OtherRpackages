@@ -362,6 +362,13 @@ run.mle.vam.cpp<-function(obj,par0,fixed,method=NULL,verbose=TRUE,...) {
   res$par
 }
 
+coef.mle.vam.cpp <- function(obj,par) {
+	res <-run.mle.vam.cpp(obj,par,verbose=FALSE)
+	if(obj$optim$convergence>0) cat("convergence=",obj$optim$convergence,"\n",sep="")
+	alpha <- obj$rcpp()$alpha_est(c(1,res))
+	c(alpha,res)
+}
+
 # for both sim and mle
 
 parse.vam.formula <- function(obj,formula,Rcpp.mode=FALSE) {

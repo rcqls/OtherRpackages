@@ -33,7 +33,7 @@ void VamCache::update_Vleft(bool with_gradient) {
 
 void VamCache::set_data(List data){
 	time = data["Time"]; type = data["Type"];
-	printf("Address of data is %p\n", (void *)time);
+	//printf("Address of data is %p\n", (void *)time);
 }
 
 
