@@ -17,6 +17,8 @@ RCPP_MODULE(vam_module) {
     .constructor<List>()
     .method("cache",&SimVam::get_cache,"cache accessor")
     .method("simulate",&SimVam::simulate,"simulate")
+    .method("get_params",&SimVam::get_params,"get params")
+    .method("set_params",&SimVam::set_params,"set params")
     ;
 
     class_<MLEVam>( "MLEVamCpp" )
@@ -26,6 +28,8 @@ RCPP_MODULE(vam_module) {
     .method("contrast",&MLEVam::contrast,"compute contrast")
     .method("gradient",&MLEVam::gradient,"compute gradient")
     .method("alpha_est",&MLEVam::get_alpha_est,"get alpha estimation")
+    .method("get_params",&MLEVam::get_params,"get params")
+    .method("set_params",&MLEVam::set_params,"set params")
     ;
 
     class_<FamilyModel>("FamilyModelCpp")

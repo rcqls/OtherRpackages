@@ -304,6 +304,14 @@ mle.vam.cpp <- function(formula,data) {
 	}
 }
 
+params.sim.vam.cpp <- params.mle.vam.cpp <- function(self,param) {
+	if(missing(param)) {
+		 self$rcpp()$get_params()
+	} else {
+		self$rcpp()$set_params(param)
+	}
+}
+
 update.mle.vam.cpp <- function(self,data) {
 	if(!missing(data)) {
 		model <- parse.vam.formula(NULL,self$formula,Rcpp.mode=TRUE)

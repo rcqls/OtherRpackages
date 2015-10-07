@@ -57,6 +57,14 @@ public:
         return cache;
     }
 
+    NumericVector get_params() {
+        return cache->get_params();
+    }
+
+    void set_params(NumericVector pars) {
+        cache->set_params(pars);
+    }
+
 
 private:
     VamCache* cache;

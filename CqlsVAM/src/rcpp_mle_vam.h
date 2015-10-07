@@ -21,6 +21,14 @@ public:
         cache->set_data(data);
     }
 
+    NumericVector get_params() {
+        return cache->get_params();
+    }
+
+    void set_params(NumericVector pars) {
+        cache->set_params(pars);
+    }
+
 
     NumericVector contrast(NumericVector param) {
     	NumericVector res(1);
