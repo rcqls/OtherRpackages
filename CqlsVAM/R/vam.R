@@ -108,9 +108,17 @@ sim.vam.cpp <- function(formula,data) {
 	}
 }
 
-simulate.sim.vam.cpp <- function(self, nbsim=10, stop.time = Inf) {
+simulate.sim.vam.cpp <- function(self, n=10, stop.time = Inf) {
 	rcpp <- if("package:CqlsPersistentRcppObject" %in% search()) self$rcpp() else self$rcpp
-	rcpp$simulate(nbsim)[-1,]
+	if(length(n)>1) {
+		# multisystem
+		for(i in seq(n)) {
+			df2 <- rcpp$simulate(n[i])[-1,]
+			df2$System <- i
+			df <- if(i==1) df2 else rbind(df,df2)
+		}
+		df
+	} else rcpp$simulate(n)[-1,]
 }
 
 # Estimation part! The usual way in R
