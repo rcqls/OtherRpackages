@@ -115,10 +115,12 @@ simulate.sim.vam.cpp <- function(self, n=10, stop.time = Inf) {
 		for(i in seq(n)) {
 			df2 <- rcpp$simulate(n[i])[-1,]
 			df2$System <- i
+			df2<-df2[c(3,1:2)]
 			df <- if(i==1) df2 else rbind(df,df2)
 		}
-		df
-	} else rcpp$simulate(n)[-1,]
+	} else df <- rcpp$simulate(n)[-1,]
+	rownames(df) <- 1:nrow(df)
+	df
 }
 
 # Estimation part! The usual way in R
@@ -395,7 +397,9 @@ parse.vam.formula <- function(obj,formula,Rcpp.mode=FALSE) {
 	} else {
 		tmp <- formula[[2]]
 		if(tmp[[1]] != as.name("&") && length(tmp) != 3) stop("Left part of formula of the form 'Time & Type'!")
-		response <- c(as.character(tmp[[2]]),as.character(tmp[[3]]))
+		if(length(tmp[[2]])==3 && tmp[[2]][[1]]==as.name("&")) {
+			response <- c(as.character(tmp[[2]][[2]]),as.character(tmp[[2]][[3]]),as.character(tmp[[3]]))
+		} else response <- c(as.character(tmp[[2]]),as.character(tmp[[3]]))
 		cm <- formula[[3]]
 	}
 	pms <- list()

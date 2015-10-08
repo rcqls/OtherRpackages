@@ -5,8 +5,10 @@ formSim <- switch(testExp,
 	~ (ARA1(.4) | Weibull(.001,2.5)) & (ARA1(.7) + ARA1(.7) | Periodic(1000,prob=c(.5,.5)) )
 )
 
+testExp <- 2
 formMle <- switch(testExp,
 	Time & Type ~ (ARA1(.4) | Weibull(.001,2.5)),
+	System & Time & Type ~ (ARA1(.4) | Weibull(.001,2.5)),
 	Time & Type ~ (ARA1(.4) | Weibull(.001,2.5)) & (ARA1(.7) + ARA1(.7) | Periodic(1000,prob=c(.5,.5)))
 )
 
