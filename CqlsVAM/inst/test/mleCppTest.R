@@ -2,7 +2,7 @@
 require(CqlsVAM)
 require(CqlsPersistentRcppObject)
 
-nExp<-10000
+nExp<-100000
 simulate(simCpp,nExp) -> simDf
 update(mleCpp,data=simDf)
 

@@ -17,8 +17,8 @@ public:
         delete cache;
     };
 
-    void set_data(List data) {
-        cache->set_data(data);
+    void set_data(List data_) {
+        cache->set_data(data_);
     }
 
     NumericVector get_params() {
@@ -30,10 +30,9 @@ public:
     }
 
 
-    NumericVector contrast(NumericVector param) {
+    NumericVector contrast_for_current_system() {
     	NumericVector res(1);
     	init_mle_vam(false);
-		cache->set_params(param);
 		int n=(cache->time).size() - 1;
 		while(cache->k < n) {
 			contrast_update(false);
@@ -46,13 +45,24 @@ public:
 		// log-likelihood (at constant)
 		
 		res[0]=-log(cache->S1) * cache->S3 + cache->S2;
-    	return res;
+        return res;
     }
 
-    NumericVector gradient(NumericVector param) {
-    	NumericVector res(cache->nbPM + 2);
+    NumericVector contrast(NumericVector param) {
+        NumericVector res;
+        cache->set_params(param);
+        res=contrast_for_current_system();
+        for(int i=1;i<cache->nb_system;i++) {
+            cache->select_data(i);
+            NumericVector res2=contrast_for_current_system();
+            res[0] += res2[0];
+        }
+        return res;
+    }
+
+    NumericVector gradient_for_current_system() {
+    	NumericVector res;
     	init_mle_vam(true);
-    	cache->set_params(param);
     	int n=(cache->time).size() - 1;
     	while(cache->k < n) {
     		gradient_update();
@@ -65,6 +75,20 @@ public:
     		res[i] = -cache->dS1[i]/cache->S1 * cache->S3 + cache->dS2[i];
     	}
     	return res;
+    }
+
+    NumericVector gradient(NumericVector param) {
+        NumericVector res;
+        cache->set_params(param);
+        res=gradient_for_current_system();
+        for(int i=1;i<cache->nb_system;i++) {
+            cache->select_data(i);
+            NumericVector res2=gradient_for_current_system();
+            for(int i=0;i<cache->nbPM + 2;i++) {
+                res[i] += res2[i];
+            }
+        }
+        return res;
     }
 
     NumericVector get_alpha_est(NumericVector param) {

@@ -15,9 +15,9 @@ public:
         init(model_);
     };
 
-	VamCache(List model_,List data) {
+	VamCache(List model_,List data_) {
 		init(model_);
-		set_data(data);
+		set_data(data_);
 	};
 
 	~VamCache() {
@@ -31,7 +31,9 @@ public:
 		//delete models;
 	};
 
-	int k,nbPM,idMod;
+	int k,nbPM,idMod,nb_system;
+
+	List data;
 
 	NumericVector time, type;
 
@@ -84,7 +86,9 @@ public:
 		return ret;
 	}
 
-	void set_data(List data);
+	void set_data(List data_);
+
+	void select_data(int i);
 
 	NumericVector get_params();
 

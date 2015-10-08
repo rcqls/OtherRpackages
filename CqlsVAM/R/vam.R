@@ -295,7 +295,7 @@ mle.vam.cpp <- function(formula,data) {
 		PersistentRcppObject(self,new = {
 			model <- parse.vam.formula(NULL,self$formula,Rcpp.mode=TRUE)
 			response <- model$response
-			data <- data.frame(Time=c(0,self$data[[response[1]]]),Type=c(1,self$data[[response[2]]]))
+			data <- data.frame.to.list.mle.vam.cpp(self$data,response)
 			rcpp <- new(MLEVamCpp,model,data)
 			rcpp 
 		})
@@ -314,6 +314,22 @@ mle.vam.cpp <- function(formula,data) {
 	}
 }
 
+data.frame.to.list.mle.vam.cpp <- function(data,response) {
+	if(length(response)==2) {
+		if(length(intersect(response,names(data))) != 2) stop(paste0("Bad response:",response))
+		data2 <- list(data.frame(Time=c(0,data[[response[1]]]),Type=c(1,data[[response[2]]])))
+	} else {
+		if(length(intersect(response,names(data))) != 3) stop(paste0("Bad response:",response))
+		syst0 <- unique(syst<-data[[response[1]]])
+		data2 <- list()
+		for(i in seq_along(syst0)) {
+			df <- data[syst==syst0[i],response]
+			data2[[i]] <- data.frame(Time=c(0,df[[response[2]]]),Type=c(1,df[[response[3]]]))
+		}
+	}
+	data2
+}
+
 params.sim.vam.cpp <- params.mle.vam.cpp <- function(self,param) {
 	if(missing(param)) {
 		 self$rcpp()$get_params()
@@ -326,8 +342,9 @@ update.mle.vam.cpp <- function(self,data) {
 	if(!missing(data)) {
 		model <- parse.vam.formula(NULL,self$formula,Rcpp.mode=TRUE)
 		response <- model$response
-		data <- data.frame(Time=c(0,data[[response[1]]]),Type=c(1,data[[response[2]]]))
-		self$rcpp()$set_data(data)
+		self$data <- data
+		data2 <- data.frame.to.list.mle.vam.cpp(self$data,response)
+		self$rcpp()$set_data(data2)
 	}
 }
 

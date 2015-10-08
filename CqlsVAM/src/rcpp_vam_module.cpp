@@ -24,7 +24,7 @@ RCPP_MODULE(vam_module) {
     class_<MLEVam>( "MLEVamCpp" )
     .constructor<List,List>()
     .method("cache",&MLEVam::get_cache,"cache accessor")
-    .method("set_data",&MLEVam::set_data,"set params")
+    .method("set_data",&MLEVam::set_data,"set data")
     .method("contrast",&MLEVam::contrast,"compute contrast")
     .method("gradient",&MLEVam::gradient,"compute gradient")
     .method("alpha_est",&MLEVam::get_alpha_est,"get alpha estimation")
