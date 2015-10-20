@@ -1,14 +1,16 @@
-#mleCppTest.R
+#mleMultiCppTest.R
 require(CqlsVAM)
 require(CqlsPersistentRcppObject)
 
-nExp <-10000
+nExp<-rep(10,1000)
+#nExp <-10000
 cat("Simulating...\n")
 simulate(simCpp,nExp,as.list=length(nExp)>1) -> simDf
-cat("Number of system:",nExp,"\n")
-update(mleCpp,data=simDf)
+cat("Table of number of system:\n")
+print(table(nExp))
+update(mleCppMulti,data=simDf)
 
-print(coef(mleCpp,
+print(coef(mleCppMulti,
 	switch(testExp,
 		c(1,2.5,.5),
  		c(1,2.5,.5),

@@ -1,6 +1,6 @@
 require(CqlsVAM)
 require(CqlsPersistentRcppObject)
-testExp <- 2
+testExp <- 1
 nExp<-rep(1000,2)
 formSim <- switch(testExp,
 	~ (ARA1(.4) | Weibull(.001,2.5)),
