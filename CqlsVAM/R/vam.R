@@ -116,7 +116,7 @@ simulate.sim.vam.cpp <- function(self, n=10, stop.time = Inf,as.list=FALSE) {
 		for(i in seq_along(n)) {
 			df2 <- rcpp$simulate(n[i])[-1,]
 			if(as.list) {
-				df[[i]] <- rbind(data.frame(Time=0,Type=1),df2)
+				df[[i]] <- df2 #rbind(data.frame(Time=0,Type=1),df2)
 			} else {
 				df2$System <- i
 				df2<-df2[c(3,1:2)]
@@ -321,7 +321,7 @@ mle.vam.cpp <- function(formula,data) {
 
 data.frame.to.list.mle.vam.cpp <- function(data,response) {
 	# return data if it is already only a list!
-	if(is.list(data) && !is.data.frame(data)) return(data)
+	if(is.list(data) && !is.data.frame(data)) return(lapply(data,function(df) rbind(data.frame(Time=0,Type=1),df)))
 	# otherwise
 	if(length(response)==2) {
 		if(length(intersect(response,names(data))) != 2) stop(paste0("Bad response:",response))
