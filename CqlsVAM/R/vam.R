@@ -108,18 +108,23 @@ sim.vam.cpp <- function(formula,data) {
 	}
 }
 
-simulate.sim.vam.cpp <- function(self, n=10, stop.time = Inf) {
+simulate.sim.vam.cpp <- function(self, n=10, stop.time = Inf,as.list=FALSE) {
 	rcpp <- if("package:CqlsPersistentRcppObject" %in% search()) self$rcpp() else self$rcpp
 	if(length(n)>1) {
 		# multisystem
-		for(i in seq(n)) {
+		if(as.list) df<-list()
+		for(i in seq_along(n)) {
 			df2 <- rcpp$simulate(n[i])[-1,]
-			df2$System <- i
-			df2<-df2[c(3,1:2)]
-			df <- if(i==1) df2 else rbind(df,df2)
+			if(as.list) {
+				df[[i]] <- rbind(data.frame(Time=0,Type=1),df2)
+			} else {
+				df2$System <- i
+				df2<-df2[c(3,1:2)]
+				df <- if(i==1) df2 else rbind(df,df2)
+			}
 		}
 	} else df <- rcpp$simulate(n)[-1,]
-	rownames(df) <- 1:nrow(df)
+	if(!as.list) rownames(df) <- 1:nrow(df)
 	df
 }
 
@@ -315,20 +320,29 @@ mle.vam.cpp <- function(formula,data) {
 }
 
 data.frame.to.list.mle.vam.cpp <- function(data,response) {
+	# return data if it is already only a list!
+	if(is.list(data) && !is.data.frame(data)) return(data)
+	# otherwise
 	if(length(response)==2) {
 		if(length(intersect(response,names(data))) != 2) stop(paste0("Bad response:",response))
-		data2 <- list(data.frame(Time=c(0,data[[response[1]]]),Type=c(1,data[[response[2]]])))
+		tmp <- data[[response[1]]]
+		data2 <- list(data.frame(Time=c(0,tmp[order(tmp)]),Type=c(1,data[[response[2]]][order(tmp)])))
 	} else {
 		if(length(intersect(response,names(data))) != 3) stop(paste0("Bad response:",response))
 		syst0 <- unique(syst<-data[[response[1]]])
 		data2 <- list()
 		for(i in seq_along(syst0)) {
 			df <- data[syst==syst0[i],response]
-			data2[[i]] <- data.frame(Time=c(0,df[[response[2]]]),Type=c(1,df[[response[3]]]))
+			tmp <- df[[response[2]]]
+			data2[[i]] <- data.frame(Time=c(0,tmp[order(tmp)]),Type=c(1,df[[response[3]]][order(tmp)]))
 		}
 	}
 	data2
 }
+
+# to convert in Rcpp
+
+
 
 params.sim.vam.cpp <- params.mle.vam.cpp <- function(self,param) {
 	if(missing(param)) {

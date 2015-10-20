@@ -1,7 +1,7 @@
 require(CqlsVAM)
 require(CqlsPersistentRcppObject)
 testExp <- 2
-nExp<-10000
+nExp<-rep(1000,2)
 formSim <- switch(testExp,
 	~ (ARA1(.4) | Weibull(.001,2.5)),
 	~ (ARAInf(.4) | Weibull(.001,2.5)),
@@ -17,11 +17,13 @@ formSim <- switch(testExp,
 # )
 
 formMle <- update(formSim,Time & Type ~ .)
+formMleMulti <- update(formSim,System & Time & Type ~ .)
 
 
 simCpp <- sim.vam.cpp(formSim)
 simulate(simCpp,nExp) -> simDf
 mleCpp <- mle.vam.cpp( formMle ,data=simDf)
+mleCppMulti <- mle.vam.cpp( formMleMulti ,data=simDf)
 
 # mleCpp <- list()
 # for(i in 1:10) {

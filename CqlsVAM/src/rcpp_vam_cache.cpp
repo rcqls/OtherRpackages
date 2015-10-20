@@ -34,7 +34,7 @@ void VamCache::update_Vleft(bool with_gradient) {
 void VamCache::set_data(List data_) {
 	data=data_;
 	nb_system=data.size();
-	//printf("Number of systems: %d\n",nb_syst);
+	//printf("Number of systems: %d\n",nb_system);
 	select_data(0);//default when only one system no need to 
 }
 
