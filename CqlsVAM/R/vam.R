@@ -485,6 +485,7 @@ parse.vam.formula <- function(obj,formula,Rcpp.mode=FALSE) {
 			cm[[1]] <- as.name(paste0(as.character(cm[[1]]),".va.model"))
 		}
 		cm[[length(cm)+1]] <- as.name("obj")
+		
 		if(Rcpp.mode) list(model=cm,family=family) else list(model=eval(cm),family=eval(family))
 	}
 	cpt.cms <- 0
@@ -498,7 +499,7 @@ parse.vam.formula <- function(obj,formula,Rcpp.mode=FALSE) {
 
 	if(Rcpp.mode) {
 		convert.cm <- function(cm) {
-
+			
 			list(
 				model=list(
 					name=as.character(cm$model[[1]]),
@@ -506,7 +507,9 @@ parse.vam.formula <- function(obj,formula,Rcpp.mode=FALSE) {
 				),
 				family=list(
 					name=as.character(cm$family[[1]]),
-					params=sapply(cm$family[-1],as.vector)
+					params=sapply(cm$family[-1],function(e) as.vector(eval(e)))
+					## instead of : params=sapply(cm$family[-1],as.vector)
+					## which does not work with negative real since element of tmp[-1] interpreted as call!
 				)
 			)
 		}
@@ -530,7 +533,9 @@ parse.vam.formula <- function(obj,formula,Rcpp.mode=FALSE) {
 				)
 			}
 		}
+
 		cms <- convert.cm(cms[[1]])
+		
 		list(
 			response=response,
 			models=c(list(cms$model),lapply(pms[rev(seq(pms))],convert.pm)),

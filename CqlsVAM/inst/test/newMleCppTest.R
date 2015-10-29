@@ -1,6 +1,6 @@
 require(CqlsVAM)
 require(CqlsPersistentRcppObject)
-testExp <- 3
+if(!("testExp" %in% ls(1)))  testExp <- 1
 
 formSim <- switch(testExp,
 	~ (ARA1(.4) | Weibull(.001,2.5)),
@@ -25,7 +25,9 @@ simCpp <- sim.vam.cpp(formSim)
 
 nExp <- 1000
 simulate(simCpp,nExp) -> simDf
+
 mleCpp <- mle.vam.cpp( formMle ,data=simDf)
+
 
 nExp <- rep(1000,2)
 simulate(simCpp,nExp) -> simDf
