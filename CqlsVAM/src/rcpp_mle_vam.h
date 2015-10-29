@@ -156,11 +156,11 @@ private:
     	cache->update_Vleft(with_gradient);
     	cache->hVleft=cache->family->density(cache->Vleft);
     	cache->indType = ((cache->type)[(cache->k) + 1] < 0 ? 1.0 : 0.0);
-    	// printf("HVleft:%d,%lf,%lf\n",cache->k,cache->Vleft,cache->family->cummulative_density(cache->Vleft));
-    	// printf("HVright:%lf,%lf\n",cache->Vright,cache->family->cummulative_density(cache->Vright));
+    	// printf("HVleft:%d,%lf,%lf\n",cache->k,cache->Vleft,cache->family->cumulative_density(cache->Vleft));
+    	// printf("HVright:%lf,%lf\n",cache->Vright,cache->family->cumulative_density(cache->Vright));
     	// printf("S1:%lf\n",cache->S1);
     	// printf("indType,S2,hVleft:%lf,%lf,%lf\n",cache->indType,cache->S1,cache->hVleft);
-    	cache->S1 += cache->family->cummulative_density(cache->Vleft) - cache->family->cummulative_density(cache->Vright);
+    	cache->S1 += cache->family->cumulative_density(cache->Vleft) - cache->family->cumulative_density(cache->Vright);
     	cache->S2 += log(cache->hVleft)* cache->indType;
     	//for(int i=0;i<(cache->nbPM)+2;i++) cache->dS1[i] += cdVleft[i] - cdVright[i];
     	//cache->dS1 += (models->at(0))
@@ -168,7 +168,7 @@ private:
 
     void gradient_update_for_current_system() {
     	contrast_update_for_current_system(true);
-    	cache->dS1[0] += cache->family->cummulative_density_param_derivative(cache->Vleft) - cache->family->cummulative_density_param_derivative(cache->Vright);
+    	cache->dS1[0] += cache->family->cumulative_density_param_derivative(cache->Vleft) - cache->family->cumulative_density_param_derivative(cache->Vright);
     	cache->dS2[0] += cache->family->density_param_derivative(cache->Vleft)/cache->hVleft*cache->indType ;
     	double hVright=cache->family->density(cache->Vright);
     	double dhVleft=cache->family->density_derivative(cache->Vleft);

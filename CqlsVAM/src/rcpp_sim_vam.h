@@ -24,7 +24,7 @@ public:
             //### modAV <- if(Type[k]<0) obj$vam.CM[[1]]$model else obj$vam.PM$models[[obj$data$Type[k]]]
             //# Here, obj$cache$k means k-1
             //#print(c(obj$cache$Vleft,obj$cache$Vright))
-            double timePM, timeCM = cache->models->at(cache->idMod)->virtual_age_inverse(cache->family->inverse_cummulative_density(cache->family->cummulative_density(cache->models->at(cache->idMod)->virtual_age(cache->time[cache->k]))-log(runif(1))[0]));
+            double timePM, timeCM = cache->models->at(cache->idMod)->virtual_age_inverse(cache->family->inverse_cumulative_density(cache->family->cumulative_density(cache->models->at(cache->idMod)->virtual_age(cache->time[cache->k]))-log(runif(1))[0]));
             int idMod;
             List timeAndTypePM;
             if(cache->maintenance_policy != NULL) {

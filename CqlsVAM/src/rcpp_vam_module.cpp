@@ -34,11 +34,11 @@ RCPP_MODULE(vam_module) {
 
     class_<FamilyModel>("FamilyModelCpp")
     .method("density",&FamilyModel::density,"density")
-    .method("cummulative_density",&FamilyModel::cummulative_density,"cummulative density")
+    .method("cumulative_density",&FamilyModel::cumulative_density,"cumulative density")
     .method("density_derivative",&FamilyModel::density_derivative,"density_derivative")
-    .method("inverse_cummulative_density",&FamilyModel::inverse_cummulative_density,"inverse cummulative density")
+    .method("inverse_cumulative_density",&FamilyModel::inverse_cumulative_density,"inverse cumulative density")
     .method("density_param_derivative",&FamilyModel::density_param_derivative,"density derivative with respect to beta")
-    .method("cummulative_density_param_derivative",&FamilyModel::cummulative_density_param_derivative,"cummulative density derivative with respect to beta")
+    .method("cumulative_density_param_derivative",&FamilyModel::cumulative_density_param_derivative,"cumulative density derivative with respect to beta")
     ;
 
     function( "newMaintenancePolicy", &newMaintenancePolicy );

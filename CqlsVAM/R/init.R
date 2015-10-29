@@ -1,14 +1,14 @@
 params <- function(obj,...) UseMethod("params")
 
-cummulative.density <- function(x,...) UseMethod("cummulative.density") 
+cumulative.density <- function(x,...) UseMethod("cumulative.density") 
 
-inverse.cummulative.density <- function(x,...) UseMethod("inverse.cummulative.density") 
+inverse.cumulative.density <- function(x,...) UseMethod("inverse.cumulative.density") 
 
 density.derivative <- function(x,...) UseMethod("density.derivative") 
 
 density.param.derivative <- function(x,...) UseMethod("density.param.derivative") 
 
-cummulative.density.param.derivative <- function(x,...) UseMethod("cummulative.density.param.derivative") 
+cumulative.density.param.derivative <- function(x,...) UseMethod("cumulative.density.param.derivative") 
 
 virtual.age <- function(x,...) UseMethod("virtual.age") 
 

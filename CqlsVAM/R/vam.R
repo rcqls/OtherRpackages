@@ -63,7 +63,7 @@ simulate.sim.vam <- function(obj, nbsim=10, stop.time = Inf,seed = NULL) {
 		### modAV <- if(Type[k]<0) obj$vam.CM[[1]]$model else obj$vam.PM$models[[obj$data$Type[k]]]
 		# Here, obj$cache$k means k-1
 		#print(c(obj$cache$Vleft,obj$cache$Vright))
-		time.CM <- inverse.virtual.age(obj$cache$mod,inverse.cummulative.density(family,cummulative.density(family,virtual.age(obj$cache$mod,obj$data$Time[obj$cache$k]))-log(runif(1))))
+		time.CM <- inverse.virtual.age(obj$cache$mod,inverse.cumulative.density(family,cumulative.density(family,virtual.age(obj$cache$mod,obj$data$Time[obj$cache$k]))-log(runif(1))))
 
 		timeAndType.PM <- update(obj$vam.PM$policy,obj$data$Time[obj$cache$k]) # Peut-être ajout Vright comme argument de update
 #print(c(time.CM,timeAndType.PM$time))
@@ -169,7 +169,7 @@ init.mle.vam <- function(obj,with.gradient=FALSE) {
 
 contrast.update.mle.vam <- function(obj,with.gradient=FALSE) {
 	update.Vleft.vam(obj,with.gradient)
-	obj$cache$S1 <- obj$cache$S1 + (cummulative.density(obj$vam.CM[[1]]$family,obj$cache$Vleft)) - (cummulative.density(obj$vam.CM[[1]]$family,obj$cache$Vright))
+	obj$cache$S1 <- obj$cache$S1 + (cumulative.density(obj$vam.CM[[1]]$family,obj$cache$Vleft)) - (cumulative.density(obj$vam.CM[[1]]$family,obj$cache$Vright))
 	#if(is.nan(obj$cache$hVleft) || obj$cache$hVleft<=0) print(list("hVleft",obj$cache$hVleft))
 	obj$cache$S2 <- obj$cache$S2 + log(obj$cache$hVleft <- density(obj$vam.CM[[1]]$family,obj$cache$Vleft))*((obj$data$Type[obj$cache$k+1]<0)->obj$cache$indCM)
 }
@@ -178,9 +178,9 @@ gradient.update.mle.vam <- function(obj,with.gradient=TRUE) {
 	#cat("1111\n");print(obj$cache$dS1)
 	contrast.update.mle.vam(obj,with.gradient)
 	#cat("2222\n");print(obj$cache$dS1)
-	#print(list("1",cummulative.density.param.derivative(obj$vam.CM[[1]]$family,obj$cache$Vleft), cummulative.density.param.derivative(obj$vam.CM[[1]]$family,obj$cache$Vright)))
+	#print(list("1",cumulative.density.param.derivative(obj$vam.CM[[1]]$family,obj$cache$Vleft), cumulative.density.param.derivative(obj$vam.CM[[1]]$family,obj$cache$Vright)))
 	obj$cache$dS1 <- obj$cache$dS1 + c(
-			cummulative.density.param.derivative(obj$vam.CM[[1]]$family,obj$cache$Vleft) - cummulative.density.param.derivative(obj$vam.CM[[1]]$family,obj$cache$Vright),
+			cumulative.density.param.derivative(obj$vam.CM[[1]]$family,obj$cache$Vleft) - cumulative.density.param.derivative(obj$vam.CM[[1]]$family,obj$cache$Vright),
 			obj$cache$hVleft * obj$cache$dVleft - density(obj$vam.CM[[1]]$family,obj$cache$Vright) * obj$cache$dVright
 		)
 	#cat("3333\n");print(obj$cache$dS1)
