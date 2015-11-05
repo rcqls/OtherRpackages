@@ -503,7 +503,7 @@ parse.vam.formula <- function(obj,formula,Rcpp.mode=FALSE) {
 			list(
 				model=list(
 					name=as.character(cm$model[[1]]),
-					params=sapply(cm$model[2:(length(cm$model)-1)],as.vector)
+					params=sapply(cm$model[2:(length(cm$model)-1)],function(e) as.vector(eval(e)))
 				),
 				family=list(
 					name=as.character(cm$family[[1]]),
@@ -516,7 +516,7 @@ parse.vam.formula <- function(obj,formula,Rcpp.mode=FALSE) {
 		convert.pm <- function(pm) {
 			list(
 				name=as.character(pm[[1]]),
-				params=sapply(pm[2:(length(pm)-1)],as.vector)
+				params=sapply(pm[2:(length(pm)-1)],function(e) as.vector(eval(e)))
 			)
 
 		}

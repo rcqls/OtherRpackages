@@ -42,15 +42,15 @@ params.LogLinear.family.cm <- function(obj,param) {
   }
 }
 
-density.LogLinear.family.cm <- function(obj,t) if(t<=0) 0 else exp(obj$alpha+obj$beta*t)
+density.LogLinear.family.cm <- function(obj,t) if(t<=0) 0 else obj$alpha*exp(obj$beta*t)
 
-cumulative.density.LogLinear.family.cm <- function(obj,t) exp(obj$alpha)*(exp(obj$beta*t)-1)/obj$beta
+cumulative.density.LogLinear.family.cm <- function(obj,t) obj$alpha*(exp(obj$beta*t)-1)/obj$beta
 
-inverse.cumulative.density.LogLinear.family.cm <- function(obj,x) log(1+x*obj$beta*exp(-obj$alpha))/obj$beta
+inverse.cumulative.density.LogLinear.family.cm <- function(obj,x) log(1+x*obj$beta/obj$alpha)/obj$beta
 
-density.derivative.LogLinear.family.cm <- function(obj,t) obj$beta*exp(obj$alpha+obj$beta*t)
+density.derivative.LogLinear.family.cm <- function(obj,t) obj$alpha*obj$beta*exp(obj$beta*t)
 
-density.param.derivative.LogLinear.family.cm <- function(obj,t) t*exp(obj$alpha+obj$beta*t)
+density.param.derivative.LogLinear.family.cm <- function(obj,t) obj$alpha*t*exp(obj$beta*t)
 
-cumulative.density.param.derivative.LogLinear.family.cm <- function(obj,t) exp(obj$alpha)*(t*exp(t*obj$beta)/obj$beta-(exp(obj$beta*t)-1)/obj$beta^2)
+cumulative.density.param.derivative.LogLinear.family.cm <- function(obj,t) obj$alpha*(t*exp(t*obj$beta)/obj$beta-(exp(obj$beta*t)-1)/obj$beta^2)
 

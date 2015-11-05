@@ -97,28 +97,28 @@ class LogLinearFamilyModel : public FamilyModel {
   }
   
   double density(double x) {
-    return (x<=0 ? 0 : exp(alpha+beta*x));
+    return (x<=0 ? 0 : alpha*exp(beta*x));
   }
   
   double cumulative_density(double x) {
-    return exp(alpha)*(exp(beta*x)-1)/beta;
+    return alpha*(exp(beta*x)-1)/beta;
   }
   
   double inverse_cumulative_density(double x) {
-    return log(1+x*beta*exp(-alpha))/beta;
+    return log(1+x*beta/alpha)/beta;
     
   }
   
   double density_derivative(double x) {
-    return (x<=0 ? 0 : beta*exp(alpha+beta*x));
+    return (x<=0 ? 0 : alpha*beta*exp(beta*x));
   }
   
   double density_param_derivative(double x) {
-    return  x*exp(alpha+beta*x) ;
+    return  alpha*x*exp(beta*x) ;
   }
   
   double cumulative_density_param_derivative(double x) {
-    return exp(alpha)*(x*exp(x*beta)/beta-(exp(beta*x)-1)/pow(beta,2));
+    return alpha*(x*exp(x*beta)/beta-(exp(beta*x)-1)/pow(beta,2));
   }
   
 };

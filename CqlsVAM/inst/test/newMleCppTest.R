@@ -7,7 +7,7 @@ formSim <- switch(testExp,
 	~ (ARAInf(.4) | Weibull(.001,2.5)),
 	~ (ARA1(.4) | Weibull(.001,2.5)) & (ARA1(.7) + ARA1(.7) | Periodic(1,prob=c(.5,.5)) ),
 	~ (ARAInf(.4) | Weibull(.001,2.5)) & (ARA1(.7) + ARA1(.7) | Periodic(10,prob=c(.5,.5)) ),
-	~ (ARA1(.8) | LogLinear(-5,0.5))
+	~ (ARA1(.8) | LogLinear(exp(-5),0.5))
 )
 
 # formMle <- switch(testExp,
