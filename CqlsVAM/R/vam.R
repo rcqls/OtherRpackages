@@ -11,7 +11,7 @@ sim.vam <- function(formula,data) {
 	# sim.vam(~ (ARA1(.4) | Weibull(1,2.5)) & (ARA1(.7) + ARAInf(.6) | Periodic(100,prob=c(.5,.5)) ) )
 
 	obj <- new.env()
-	obj$cache <- list()
+	obj$model <- list()
 	obj$response <- parse.vam.formula(obj,formula)
 	
 	# todo: scale to take from Weibull and replace alpha with 1 in the weibull ????
@@ -22,9 +22,9 @@ sim.vam <- function(formula,data) {
 }
 
 init.sim.vam <- function(obj) {
-	obj$cache$Vright<-0
-	obj$cache$k<-1
-	obj$cache$mod<-obj$vam.PM$models[[1]] # 1 because of current obj$data$data$Type
+	obj$model$Vright<-0
+	obj$model$k<-1
+	obj$model$mod<-obj$vam.PM$models[[1]] # 1 because of current obj$data$data$Type
 }
 
 init.data.vam <- function(obj) {
@@ -35,7 +35,7 @@ init.data.vam <- function(obj) {
 		# 		-> first, estimate with parameters values used as initialization
 		#		-> then simulate!
 		obj$data <- data.frame(Time=data[[obj$response[1]]],Type=data[[obj$response[2]]])
-		obj$cache$k <- NCOL(obj$data)
+		obj$model$k <- NCOL(obj$data)
 	} 
 } 
 
@@ -59,13 +59,13 @@ simulate.sim.vam <- function(obj, nbsim=10, stop.time = Inf,seed = NULL) {
 	# when concurrency between CMs occurs this line would be inside the loop
 	family <- obj$vam.CM[[1]]$family
 
-	while(obj$cache$k < nbsim && obj$data$Time[obj$cache$k] < stop.time) {
+	while(obj$model$k < nbsim && obj$data$Time[obj$model$k] < stop.time) {
 		### modAV <- if(Type[k]<0) obj$vam.CM[[1]]$model else obj$vam.PM$models[[obj$data$Type[k]]]
-		# Here, obj$cache$k means k-1
-		#print(c(obj$cache$Vleft,obj$cache$Vright))
-		time.CM <- inverse.virtual.age(obj$cache$mod,inverse.cumulative.density(family,cumulative.density(family,virtual.age(obj$cache$mod,obj$data$Time[obj$cache$k]))-log(runif(1))))
+		# Here, obj$model$k means k-1
+		#print(c(obj$model$Vleft,obj$model$Vright))
+		time.CM <- inverse.virtual.age(obj$model$mod,inverse.cumulative.density(family,cumulative.density(family,virtual.age(obj$model$mod,obj$data$Time[obj$model$k]))-log(runif(1))))
 
-		timeAndType.PM <- update(obj$vam.PM$policy,obj$data$Time[obj$cache$k]) # Peut-être ajout Vright comme argument de update
+		timeAndType.PM <- update(obj$vam.PM$policy,obj$data$Time[obj$model$k]) # Peut-être ajout Vright comme argument de update
 #print(c(time.CM,timeAndType.PM$time))
 		if(time.CM < timeAndType.PM$time) {
 			obj$data <- rbind(obj$data, c(time.CM,-1)) #or -2, -3 dependening on the numbers of CM and the concurrency between CMs times
@@ -74,11 +74,11 @@ simulate.sim.vam <- function(obj, nbsim=10, stop.time = Inf,seed = NULL) {
 		} else {
 			obj$data <- rbind(obj$data,c(timeAndType.PM$time,timeAndType.PM$type))
 			# new model!
-			mod <- obj$vam.PM$models[[obj$data$Type[obj$cache$k+1]]]
+			mod <- obj$vam.PM$models[[obj$data$Type[obj$model$k+1]]]
 		}
 		# used in the next update
 		update.Vleft.vam(obj)
-		# update the next k, and save model in cache too!
+		# update the next k, and save model in model too!
 		update(mod)
 	}
 
@@ -136,7 +136,7 @@ mle.vam <- function(formula,data) {
 	# vam( Time & Type ~ (ARA1(rhoCM) | Weibull(alpha,beta)) & (ARA1(rhoPM[1]) + ARAInf(rhoPM[2]) | Periodic(100,prob=c(.5,.5)) ) , data= df)
 
 	obj <- new.env()
-	obj$cache <- list()
+	obj$model <- list()
 	response <- parse.vam.formula(obj,formula)
 	if(is.null(response)) stop("Left part of formula is required!")
 	else {
@@ -152,43 +152,43 @@ mle.vam <- function(formula,data) {
 }
 
 init.mle.vam <- function(obj,with.gradient=FALSE) {
-	obj$cache$Vright <- 0 #Inf	# useless value at init
-	obj$cache$k<- 1 # different from simulation
-	obj$cache$mod <- obj$vam.PM$models[[1]] # useless value at init
+	obj$model$Vright <- 0 #Inf	# useless value at init
+	obj$model$k<- 1 # different from simulation
+	obj$model$mod <- obj$vam.PM$models[[1]] # useless value at init
 	# the rest
-	obj$cache$S1 <- 0
-	obj$cache$S2 <- 0
-	obj$cache$S3 <- sum(obj$data$Type<0)
-	obj$cache$hVleft <- 0
+	obj$model$S1 <- 0
+	obj$model$S2 <- 0
+	obj$model$S3 <- sum(obj$data$Type<0)
+	obj$model$hVleft <- 0
 	if(with.gradient) {
-		obj$cache$dVright <- rep(0,1+length(obj$vam.PM)) #not with respect to beta
-		obj$cache$dS1 <- rep(0,2+length(obj$vam.PM))
-		obj$cache$dS2 <- rep(0,2+length(obj$vam.PM))
+		obj$model$dVright <- rep(0,1+length(obj$vam.PM)) #not with respect to beta
+		obj$model$dS1 <- rep(0,2+length(obj$vam.PM))
+		obj$model$dS2 <- rep(0,2+length(obj$vam.PM))
 	}
 }
 
 contrast.update.mle.vam <- function(obj,with.gradient=FALSE) {
 	update.Vleft.vam(obj,with.gradient)
-	obj$cache$S1 <- obj$cache$S1 + (cumulative.density(obj$vam.CM[[1]]$family,obj$cache$Vleft)) - (cumulative.density(obj$vam.CM[[1]]$family,obj$cache$Vright))
-	#if(is.nan(obj$cache$hVleft) || obj$cache$hVleft<=0) print(list("hVleft",obj$cache$hVleft))
-	obj$cache$S2 <- obj$cache$S2 + log(obj$cache$hVleft <- density(obj$vam.CM[[1]]$family,obj$cache$Vleft))*((obj$data$Type[obj$cache$k+1]<0)->obj$cache$indCM)
+	obj$model$S1 <- obj$model$S1 + (cumulative.density(obj$vam.CM[[1]]$family,obj$model$Vleft)) - (cumulative.density(obj$vam.CM[[1]]$family,obj$model$Vright))
+	#if(is.nan(obj$model$hVleft) || obj$model$hVleft<=0) print(list("hVleft",obj$model$hVleft))
+	obj$model$S2 <- obj$model$S2 + log(obj$model$hVleft <- density(obj$vam.CM[[1]]$family,obj$model$Vleft))*((obj$data$Type[obj$model$k+1]<0)->obj$model$indCM)
 }
 
 gradient.update.mle.vam <- function(obj,with.gradient=TRUE) {
-	#cat("1111\n");print(obj$cache$dS1)
+	#cat("1111\n");print(obj$model$dS1)
 	contrast.update.mle.vam(obj,with.gradient)
-	#cat("2222\n");print(obj$cache$dS1)
-	#print(list("1",cumulative.density.param.derivative(obj$vam.CM[[1]]$family,obj$cache$Vleft), cumulative.density.param.derivative(obj$vam.CM[[1]]$family,obj$cache$Vright)))
-	obj$cache$dS1 <- obj$cache$dS1 + c(
-			cumulative.density.param.derivative(obj$vam.CM[[1]]$family,obj$cache$Vleft) - cumulative.density.param.derivative(obj$vam.CM[[1]]$family,obj$cache$Vright),
-			obj$cache$hVleft * obj$cache$dVleft - density(obj$vam.CM[[1]]$family,obj$cache$Vright) * obj$cache$dVright
+	#cat("2222\n");print(obj$model$dS1)
+	#print(list("1",cumulative.density.param.derivative(obj$vam.CM[[1]]$family,obj$model$Vleft), cumulative.density.param.derivative(obj$vam.CM[[1]]$family,obj$model$Vright)))
+	obj$model$dS1 <- obj$model$dS1 + c(
+			cumulative.density.param.derivative(obj$vam.CM[[1]]$family,obj$model$Vleft) - cumulative.density.param.derivative(obj$vam.CM[[1]]$family,obj$model$Vright),
+			obj$model$hVleft * obj$model$dVleft - density(obj$vam.CM[[1]]$family,obj$model$Vright) * obj$model$dVright
 		)
-	#cat("3333\n");print(obj$cache$dS1)
-	#print(list("1",density.param.derivative(obj$vam.CM[[1]]$family,obj$cache$Vleft),obj$cache$hVleft,obj$cache$indCM))
-	#print(list("2",density.derivative(obj$vam.CM[[1]]$family,obj$cache$Vleft), obj$cache$dVleft))
-	obj$cache$dS2 <- obj$cache$dS2 + c(
-			density.param.derivative(obj$vam.CM[[1]]$family,obj$cache$Vleft)/obj$cache$hVleft * obj$cache$indCM,
-			density.derivative(obj$vam.CM[[1]]$family,obj$cache$Vleft) * obj$cache$dVleft/obj$cache$hVleft * obj$cache$indCM
+	#cat("3333\n");print(obj$model$dS1)
+	#print(list("1",density.param.derivative(obj$vam.CM[[1]]$family,obj$model$Vleft),obj$model$hVleft,obj$model$indCM))
+	#print(list("2",density.derivative(obj$vam.CM[[1]]$family,obj$model$Vleft), obj$model$dVleft))
+	obj$model$dS2 <- obj$model$dS2 + c(
+			density.param.derivative(obj$vam.CM[[1]]$family,obj$model$Vleft)/obj$model$hVleft * obj$model$indCM,
+			density.derivative(obj$vam.CM[[1]]$family,obj$model$Vleft) * obj$model$dVleft/obj$model$hVleft * obj$model$indCM
 		)
 }
 
@@ -206,34 +206,34 @@ params.sim.vam <- params.mle.vam <- function(obj,param) {
 contrast.mle.vam <- function(obj,param) {
 	init.mle.vam(obj)
 	params(obj,param)
-	while(obj$cache$k < nrow(obj$data)) {
+	while(obj$model$k < nrow(obj$data)) {
 		contrast.update.mle.vam(obj)
 		# previous model for the next step
-		Type <- obj$data$Type[obj$cache$k+1]
+		Type <- obj$data$Type[obj$model$k+1]
 		#print(Type)
 		mod <- if(Type < 0) obj$vam.CM[[1]]$model else obj$vam.PM$models[[Type]]
 		update(mod)
 	}
 	# log-likelihood (at constant)
-	#print(list(param,-log(obj$cache$S1) * obj$cache$S3 + obj$cache$S2))
-	-log(obj$cache$S1) * obj$cache$S3 + obj$cache$S2
+	#print(list(param,-log(obj$model$S1) * obj$model$S3 + obj$model$S2))
+	-log(obj$model$S1) * obj$model$S3 + obj$model$S2
 }
 
 gradient.mle.vam <- function(obj,param) {
 	init.mle.vam(obj,with.gradient=TRUE)
 	params(obj,param)
-	while(obj$cache$k < nrow(obj$data)) {
-		#if(obj$cache$k ==1) print(list("before",obj$cache))
+	while(obj$model$k < nrow(obj$data)) {
+		#if(obj$model$k ==1) print(list("before",obj$model))
 		gradient.update.mle.vam(obj)
-		#if(obj$cache$k ==1) print(list("after",obj$cache))
+		#if(obj$model$k ==1) print(list("after",obj$model))
 		# previous model for the next step
-		Type <- obj$data$Type[obj$cache$k+1]
+		Type <- obj$data$Type[obj$model$k+1]
 		mod <- if(Type < 0) obj$vam.CM[[1]]$model else obj$vam.PM$models[[Type]]
 		update(mod,with.gradient=TRUE)
 	}
 	# return gradient
-	#print(list(param,-obj$cache$dS1/obj$cache$S1 * obj$cache$S3 + obj$cache$dS2))
-	-obj$cache$dS1/obj$cache$S1 * obj$cache$S3 + obj$cache$dS2
+	#print(list(param,-obj$model$dS1/obj$model$S1 * obj$model$S3 + obj$model$dS2))
+	-obj$model$dS1/obj$model$S1 * obj$model$S3 + obj$model$dS2
 }
 
 summary.mle.vam <- function(obj,...) {
@@ -287,9 +287,9 @@ run.mle.vam<-function(obj,par0,fixed,method=NULL,verbose=TRUE,...) {
 }
 
 update.Vleft.vam <- function(obj,with.gradient=FALSE) {
-	obj$cache$Vleft <- virtual.age(obj$cache$mod,obj$data$Time[obj$cache$k+1])
-	#print(obj$cache$Vleft)
-	if(with.gradient) obj$cache$dVleft <- virtual.age.derivative(obj$cache$mod,obj$data$Time[obj$cache$k+1])
+	obj$model$Vleft <- virtual.age(obj$model$mod,obj$data$Time[obj$model$k+1])
+	#print(obj$model$Vleft)
+	if(with.gradient) obj$model$dVleft <- virtual.age.derivative(obj$model$mod,obj$data$Time[obj$model$k+1])
 } 
 
 

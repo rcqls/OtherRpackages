@@ -16,29 +16,29 @@ params.ARA1 <- function(obj,param) {
 
 update.ARA1 <- function(obj,with.gradient=FALSE) {
 	# next step
-	obj$vam$cache$k <- obj$vam$cache$k + 1
+	obj$vam$model$k <- obj$vam$model$k + 1
 	# At T(k)
-	obj$vam$cache$Vright <- obj$vam$cache$Vright + (1-obj$rho)*(dVlr <-(obj$vam$cache$Vleft-obj$vam$cache$Vright))
+	obj$vam$model$Vright <- obj$vam$model$Vright + (1-obj$rho)*(dVlr <-(obj$vam$model$Vleft-obj$vam$model$Vright))
 	if(with.gradient) {
 		# only the rho parameters
-		#obj$vam$cache$dVright <- obj$vam$cache$dVright + rep(0,1+length(obj$vam$vam.PM$models))
+		#obj$vam$model$dVright <- obj$vam$model$dVright + rep(0,1+length(obj$vam$vam.PM$models))
 		i <- match(obj$id,seq(obj$vam$vam.PM$models),nomatch=0)+1
-		obj$vam$cache$dVright[i] <- obj$vam$cache$dVright[i] - dVlr
+		obj$vam$model$dVright[i] <- obj$vam$model$dVright[i] - dVlr
 	}
 	# save old model
-	obj$cache$mod <- obj
+	obj$model$mod <- obj
 }
 
 virtual.age.ARA1 <- function(obj,time) {
-	max(0.0000001,obj$vam$cache$Vright+time-obj$vam$data$Time[obj$vam$cache$k])
+	max(0.0000001,obj$vam$model$Vright+time-obj$vam$data$Time[obj$vam$model$k])
 }
 
 virtual.age.derivative.ARA1 <- function(obj,time) {
-	obj$vam$cache$dVright
+	obj$vam$model$dVright
 }
 
 inverse.virtual.age.ARA1 <- function(obj,time) {
-	time+obj$vam$data$Time[obj$vam$cache$k]-obj$vam$cache$Vright
+	time+obj$vam$data$Time[obj$vam$model$k]-obj$vam$model$Vright
 }
 
 ARAInf.va.model <- function(rho,vam) {
@@ -50,17 +50,17 @@ ARAInf.va.model <- function(rho,vam) {
 
 update.ARAInf <- function(obj,with.gradient=FALSE) {
 	# next step
-	obj$vam$cache$k <- obj$vam$cache$k + 1
+	obj$vam$model$k <- obj$vam$model$k + 1
 	# At T(k)
-	obj$vam$cache$Vright <- (1-obj$rho) * obj$vam$cache$Vleft
+	obj$vam$model$Vright <- (1-obj$rho) * obj$vam$model$Vleft
 	if(with.gradient) {
 		# only with respect to the rho parameters (not with respect to beta)
-		obj$vam$cache$dVright <- (1-obj$rho) * obj$vam$cache$dVright
+		obj$vam$model$dVright <- (1-obj$rho) * obj$vam$model$dVright
 		i<- match(obj$id,seq(obj$vam$vam.PM$models),nomatch=0)+1
-		obj$vam$cache$dVright[i] <-  obj$vam$cache$dVright[i] - obj$vam$cache$Vleft
+		obj$vam$model$dVright[i] <-  obj$vam$model$dVright[i] - obj$vam$model$Vleft
 	}
 	# save old model
-	obj$cache$mod <- obj
+	obj$model$mod <- obj
 }
 
 params.ARAInf <- params.ARA1

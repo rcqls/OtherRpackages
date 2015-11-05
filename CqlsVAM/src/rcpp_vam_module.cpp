@@ -2,20 +2,20 @@
 
 
 RCPP_MODULE(vam_module) {
-	class_<VamCache>("VamCacheCpp")
+	class_<VamModel>("VamModelCpp")
 	.constructor<List>()
 	.constructor<List,List>()
-	.field( "time", &VamCache::time, "time" )
-	.field( "type", &VamCache::type, "type" )
-	.method( "get", &VamCache::get, "get many informations" )
-	.method( "family", &VamCache::get_family, "get family" )
-	.method("get_params",&VamCache::get_params,"get params")
-    .method("set_params",&VamCache::set_params,"set params")
+	.field( "time", &VamModel::time, "time" )
+	.field( "type", &VamModel::type, "type" )
+	.method( "get", &VamModel::get, "get many informations" )
+	.method( "family", &VamModel::get_family, "get family" )
+	.method("get_params",&VamModel::get_params,"get params")
+    .method("set_params",&VamModel::set_params,"set params")
 	;
 
     class_<SimVam>( "SimVamCpp" )
     .constructor<List>()
-    .method("cache",&SimVam::get_cache,"cache accessor")
+    .method("model",&SimVam::get_model,"model accessor")
     .method("simulate",&SimVam::simulate,"simulate")
     .method("get_params",&SimVam::get_params,"get params")
     .method("set_params",&SimVam::set_params,"set params")
@@ -23,7 +23,7 @@ RCPP_MODULE(vam_module) {
 
     class_<MLEVam>( "MLEVamCpp" )
     .constructor<List,List>()
-    .method("cache",&MLEVam::get_cache,"cache accessor")
+    .method("model",&MLEVam::get_model,"model accessor")
     .method("set_data",&MLEVam::set_data,"set data")
     .method("contrast",&MLEVam::contrast,"compute contrast")
     .method("gradient",&MLEVam::gradient,"compute gradient")

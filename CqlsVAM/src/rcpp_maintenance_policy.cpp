@@ -10,8 +10,6 @@ MaintenancePolicy* newMaintenancePolicy(List policy) {
 		List pars=policy["params"];
 		mp=new PeriodicMaintenancePolicy(pars);
 	} //else if(name.compare("None") == 0) {
-	// 	double rho=params[0];
-	// 	vam=new ARAInf(rho,cache);
 	//	mp=NULL;
 	//}	
 	return mp;

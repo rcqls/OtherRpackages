@@ -1,21 +1,21 @@
 #ifndef RCPP_VAM_MODEL_H
 #define RCPP_VAM_MODEL_H
 #include <Rcpp.h>
-#include "rcpp_vam_cache.h"
+#include "rcpp_vam_model.h"
 
 using namespace Rcpp ;
 
 //Forward declarations
-class VamModel;
+class MaintenanceModel;
 
 //Effective declarations
-class VamModelList {//List of ModelBase (heterogeneous terms) 
+class MaintenanceModelList {//List of ModelBase (heterogeneous terms) 
 public:
-    VamModelList(List models_,VamCache* cache);
+    MaintenanceModelList(List models_,VamModel* model);
 
-    ~VamModelList();
+    ~MaintenanceModelList();
 
-    VamModel* at(int i) {
+    MaintenanceModel* at(int i) {
     	return model_list[i];
     }
 
@@ -26,18 +26,18 @@ public:
 
 protected:
 
-    std::vector<VamModel*> model_list; //model list
+    std::vector<MaintenanceModel*> model_list; //model list
      
 };
 
 
-class VamModel {
+class MaintenanceModel {
 public:
-    VamModel(VamCache* cache_) {
-    	cache = cache_;
+    MaintenanceModel(VamModel* model_) {
+    	model = model_;
     }
 
-    virtual ~VamModel() {};
+    virtual ~MaintenanceModel() {};
 
     virtual NumericVector get_params() = 0;
 
@@ -51,7 +51,7 @@ public:
 
     virtual double virtual_age_inverse(double time) = 0;
 
-    VamCache* cache;
+    VamModel* model;
 
     void set_id(int id_) {
     	id=id_;
@@ -61,11 +61,11 @@ public:
 
 };
 
-class ARA1 : public VamModel { 
+class ARA1 : public MaintenanceModel { 
 
 public:
 
-    ARA1(double rho_,VamCache* cache_) : VamModel(cache_) {
+    ARA1(double rho_,VamModel* model_) : MaintenanceModel(model_) {
     	rho = rho_;
     }
 
@@ -92,11 +92,11 @@ private:
 
 };
 
-class ARAInf : public VamModel { 
+class ARAInf : public MaintenanceModel { 
 
 public:
 
-    ARAInf(double rho_,VamCache* cache_) : VamModel(cache_) {
+    ARAInf(double rho_,VamModel* model_) : MaintenanceModel(model_) {
     	rho = rho_;
     }
 
@@ -124,6 +124,6 @@ private:
 
 };
 
-VamModel* newVamModel(List model,VamCache* cache);
+MaintenanceModel* newMaintenanceModel(List maintenance,VamModel* model);
 
 #endif //RCPP_VAM_MODEL_H

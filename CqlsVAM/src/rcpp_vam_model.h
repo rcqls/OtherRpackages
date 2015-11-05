@@ -6,21 +6,21 @@
 
 using namespace Rcpp ;
 
-class VamModelList;
+class MaintenanceModelList;
 
-class VamCache {
+class VamModel {
 public:
 
-	VamCache(List model_) {
+	VamModel(List model_) {
         init(model_);
     };
 
-	VamCache(List model_,List data_) {
+	VamModel(List model_,List data_) {
 		init(model_);
 		set_data(data_);
 	};
 
-	~VamCache() {
+	~VamModel() {
 		delete[] dVright;
 		delete[] dVleft;
 		delete[] dS1;
@@ -43,7 +43,7 @@ public:
 
 	double *dVleft, *dVright, *dS1, *dS2;
 
-	VamModelList* models;
+	MaintenanceModelList* models;
 
 	FamilyModel* family;
 
