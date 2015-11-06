@@ -1,5 +1,6 @@
+*.Rhistory
+*.RData*
 *.so
 *.o
 *~
-*.RData
-*.Rhistory
+*.tar.gz
