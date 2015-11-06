@@ -21,6 +21,7 @@ public:
 	};
 
 	~VamModel() {
+		//DEBUG: printf("VamModel: %p, %p, %p, %p, %p, %p, %p\n",dVright,dVleft,dS1,dS2,models,family,maintenance_policy);
 		delete[] dVright;
 		delete[] dVleft;
 		delete[] dS1;
@@ -28,7 +29,6 @@ public:
 		delete models;
 		delete family;
 		delete maintenance_policy;
-		//delete models;
 	};
 
 	int k,nbPM,idMod,nb_system;

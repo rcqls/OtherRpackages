@@ -383,7 +383,7 @@ update.mle.vam.cpp <- function(self,data) {
 		model <- parse.vam.formula(NULL,self$formula,Rcpp.mode=TRUE)
 		response <- model$response
 		self$data <- data
-		data2 <- data.frame.to.list.mle.vam.cpp(self$data,response)
+		data2 <- data.frame.to.list.multi.vam.cpp(self$data,response)
 		self$rcpp()$set_data(data2)
 	}
 }

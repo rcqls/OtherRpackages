@@ -16,6 +16,7 @@ public:
     }
 
     ~MLEVam() {
+        //DEBUG: printf("MLEVAM: %p, %p, %p\n",model,dS1,dS2);
         delete model;
         delete[] dS1;
         delete[] dS2;

@@ -10,12 +10,6 @@ formSim <- switch(testExp,
 	~ (ARA1(.8) | LogLinear(exp(-5),0.5))
 )
 
-# formMle <- switch(testExp,
-# 	Time & Type ~ (ARA1(.4) | Weibull(.001,2.5)),
-# 	Time & Type ~ (ARAInf(.4) | Weibull(.001,2.5)),
-# 	Time & Type ~ (ARA1(.4) | Weibull(.001,2.5)) & (ARA1(.7) + ARA1(.7) | Periodic(1,prob=c(.5,.5))),
-# 	Time & Type ~ (ARAInf(.4) | Weibull(.001,2.5)) & (ARA1(.7) + ARA1(.7) | Periodic(10,prob=c(.5,.5)))
-# )
 formModel <- update(formSim,Time & Type ~ .)
 formMle <- formModel
 formModelMulti <- update(formSim,System & Time & Type ~ .)

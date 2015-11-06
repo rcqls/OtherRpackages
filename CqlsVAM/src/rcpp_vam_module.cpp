@@ -1,5 +1,12 @@
 #include "rcpp_vam_module.h"
 
+// static void finalizer_of_sim_vam( SimVam* ptr ){
+//       printf("finalizer sim_vam has been called\n");
+// }
+
+// static void finalizer_of_mle_vam( MLEVam* ptr ){
+//       printf("finalizer mle_vam %p has been called\n",ptr);
+// }
 
 RCPP_MODULE(vam_module) {
 	class_<VamModel>("ModelVamCpp")
@@ -18,6 +25,7 @@ RCPP_MODULE(vam_module) {
 
     class_<SimVam>( "SimVamCpp" )
     .constructor<List>()
+    //.finalizer( &finalizer_of_sim_vam)
     .method("model",&SimVam::get_model,"model accessor")
     .method("simulate",&SimVam::simulate,"simulate")
     .method("get_params",&SimVam::get_params,"get params")
@@ -28,6 +36,7 @@ RCPP_MODULE(vam_module) {
 
     class_<MLEVam>( "MLEVamCpp" )
     .constructor<List,List>()
+    //.finalizer( &finalizer_of_mle_vam)
     .method("model",&MLEVam::get_model,"model accessor")
     .method("set_data",&MLEVam::set_data,"set data")
     //.method("get_selected_data",&MLEVam::get_selected_data,"get selected data")

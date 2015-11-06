@@ -28,7 +28,10 @@ void VamModel::update_Vleft(bool with_gradient) {
 	/*if(model->k < 10) printf("Vleft:%lf\n", model->Vleft);*/
 	Vleft =(models->at(idMod))->virtual_age(time[k+1]);
 	//printf("Vleft:%lf\n", model->Vleft);
-	if(with_gradient) dVleft=(models->at(idMod))->virtual_age_derivative(time[k+1]);
+	if(with_gradient) {
+		double* tmp=(models->at(idMod))->virtual_age_derivative(time[k+1]);
+		for(int i=0;i<nbPM+2;i++) dVleft[i]=tmp[i];
+	}
 }
 
 void VamModel::set_data(List data_) {
@@ -79,6 +82,7 @@ void VamModel::init(List model_) {
 	dVleft=new double[nbPM+1];
 	dS1=new double[nbPM+2];
 	dS2=new double[nbPM+2];
+	//DEBUG: printf("dVright:%p,dVleft:%p\n",dVright,dVleft);
 };
 
 void VamModel::init_virtual_age_infos() {
