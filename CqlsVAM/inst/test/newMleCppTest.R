@@ -16,15 +16,19 @@ formSim <- switch(testExp,
 # 	Time & Type ~ (ARA1(.4) | Weibull(.001,2.5)) & (ARA1(.7) + ARA1(.7) | Periodic(1,prob=c(.5,.5))),
 # 	Time & Type ~ (ARAInf(.4) | Weibull(.001,2.5)) & (ARA1(.7) + ARA1(.7) | Periodic(10,prob=c(.5,.5)))
 # )
-
-formMle <- update(formSim,Time & Type ~ .)
-formMleMulti <- update(formSim,System & Time & Type ~ .)
-
+formModel <- update(formSim,Time & Type ~ .)
+formMle <- formModel
+formModelMulti <- update(formSim,System & Time & Type ~ .)
+formMleMulti <- formModelMulti
 
 simCpp <- sim.vam.cpp(formSim)
 
 nExp <- 1000
 simulate(simCpp,nExp) -> simDf
+
+
+modelCpp <- model.vam.cpp( formModel ,data=simDf)
+
 
 mleCpp <- mle.vam.cpp( formMle ,data=simDf)
 

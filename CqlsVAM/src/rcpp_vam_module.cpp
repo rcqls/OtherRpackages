@@ -12,7 +12,9 @@ RCPP_MODULE(vam_module) {
 	.method("get_params",&VamModel::get_params,"get params")
     .method("set_params",&VamModel::set_params,"set params")
     .method("get_virtual_age_infos",&VamModel::get_virtual_age_infos,"get infos related to virtual ages")
-	;
+	.method("set_data",&VamModel::set_data,"set data")
+    .method("get_selected_data",&VamModel::get_selected_data,"get selected data")
+    ;
 
     class_<SimVam>( "SimVamCpp" )
     .constructor<List>()
@@ -20,6 +22,7 @@ RCPP_MODULE(vam_module) {
     .method("simulate",&SimVam::simulate,"simulate")
     .method("get_params",&SimVam::get_params,"get params")
     .method("set_params",&SimVam::set_params,"set params")
+    .method("get_data",&SimVam::get_data,"get data")
     .method("get_virtual_age_infos",&SimVam::get_virtual_age_infos,"get infos related to virtual ages")
     ;
 
@@ -27,6 +30,7 @@ RCPP_MODULE(vam_module) {
     .constructor<List,List>()
     .method("model",&MLEVam::get_model,"model accessor")
     .method("set_data",&MLEVam::set_data,"set data")
+    //.method("get_selected_data",&MLEVam::get_selected_data,"get selected data")
     .method("contrast",&MLEVam::contrast,"compute contrast")
     .method("gradient",&MLEVam::gradient,"compute gradient")
     .method("alpha_est",&MLEVam::get_alpha_est,"get alpha estimation")

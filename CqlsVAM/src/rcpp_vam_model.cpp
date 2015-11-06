@@ -43,6 +43,11 @@ void VamModel::select_data(int i) {
 	time = data2["Time"]; type = data2["Type"];
 }
 
+DataFrame VamModel::get_selected_data(int i) {
+	select_data(i);
+	return DataFrame::create(_["Time"]=time,_["Type"]=type);
+};
+
 
 void VamModel::set_models(List models_) {
     models=new MaintenanceModelList(models_,this);

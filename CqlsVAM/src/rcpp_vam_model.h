@@ -90,6 +90,8 @@ public:
 
 	void select_data(int i);
 
+	DataFrame get_selected_data(int i);
+
 	NumericVector get_params();
 
     void set_params(NumericVector pars);

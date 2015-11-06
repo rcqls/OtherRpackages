@@ -17,6 +17,10 @@ public:
         delete model;
     };
 
+    DataFrame get_data() {
+        return DataFrame::create(_["Time"]=model->time,_["Type"]=model->type);
+    }
+
     DataFrame simulate(int nbsim) {
         init(nbsim);
 
@@ -50,7 +54,7 @@ public:
             model->models->at(idMod)->update(false);
         }
 
-        return DataFrame::create(_["Time"]=model->time,_["Type"]=model->type);
+        return get_data();
     }
 
     VamModel* get_model() {

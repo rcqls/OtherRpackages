@@ -136,12 +136,43 @@ model.vam.cpp <- function(formula,data) {
 	PersistentRcppObject(self,new = {
 		model <- parse.vam.formula(NULL,self$formula,Rcpp.mode=TRUE)
 		response <- model$response
-		data <- data.frame.to.list.mle.vam.cpp(self$data,response)
+		data <- data.frame.to.list.multi.vam.cpp(self$data,response)
 		rcpp <- new(ModelVamCpp,model,data)
 		rcpp 
 	})
 
 	self
+}
+
+data.frame.to.list.multi.vam.cpp <- function(data,response) {
+	# return data if it is already only a list!
+	if(is.list(data) && !is.data.frame(data)) return(lapply(data,function(df) rbind(data.frame(Time=0,Type=1),df)))
+	# otherwise
+	if(length(response)==2) {
+		if(length(intersect(response,names(data))) != 2) stop(paste0("Bad response:",response))
+		tmp <- data[[response[1]]]
+		data2 <- list(data.frame(Time=c(0,tmp[order(tmp)]),Type=c(1,data[[response[2]]][order(tmp)])))
+	} else {
+		if(length(intersect(response,names(data))) != 3) stop(paste0("Bad response:",response))
+		syst0 <- unique(syst<-data[[response[1]]])
+		data2 <- list()
+		for(i in seq_along(syst0)) {
+			df <- data[syst==syst0[i],response]
+			tmp <- df[[response[2]]]
+			data2[[i]] <- data.frame(Time=c(0,tmp[order(tmp)]),Type=c(1,df[[response[3]]][order(tmp)]))
+		}
+	}
+	data2
+}
+
+update.model.vam.cpp <- function(self,data) {
+	if(!missing(data)) {
+		model <- parse.vam.formula(NULL,self$formula,Rcpp.mode=TRUE)
+		response <- model$response
+		self$data <- data
+		data2 <- data.frame.to.list.multi.vam.cpp(self$data,response)
+		self$rcpp()$set_data(data2)
+	}
 }
 
 # Estimation part! The usual way in R
@@ -316,7 +347,7 @@ mle.vam.cpp <- function(formula,data) {
 		PersistentRcppObject(self,new = {
 			model <- parse.vam.formula(NULL,self$formula,Rcpp.mode=TRUE)
 			response <- model$response
-			data <- data.frame.to.list.mle.vam.cpp(self$data,response)
+			data <- data.frame.to.list.multi.vam.cpp(self$data,response)
 			rcpp <- new(MLEVamCpp,model,data)
 			rcpp 
 		})
@@ -333,27 +364,6 @@ mle.vam.cpp <- function(formula,data) {
 		class(obj) <- "mle.vam.cpp"
 		obj
 	}
-}
-
-data.frame.to.list.mle.vam.cpp <- function(data,response) {
-	# return data if it is already only a list!
-	if(is.list(data) && !is.data.frame(data)) return(lapply(data,function(df) rbind(data.frame(Time=0,Type=1),df)))
-	# otherwise
-	if(length(response)==2) {
-		if(length(intersect(response,names(data))) != 2) stop(paste0("Bad response:",response))
-		tmp <- data[[response[1]]]
-		data2 <- list(data.frame(Time=c(0,tmp[order(tmp)]),Type=c(1,data[[response[2]]][order(tmp)])))
-	} else {
-		if(length(intersect(response,names(data))) != 3) stop(paste0("Bad response:",response))
-		syst0 <- unique(syst<-data[[response[1]]])
-		data2 <- list()
-		for(i in seq_along(syst0)) {
-			df <- data[syst==syst0[i],response]
-			tmp <- df[[response[2]]]
-			data2[[i]] <- data.frame(Time=c(0,tmp[order(tmp)]),Type=c(1,df[[response[3]]][order(tmp)]))
-		}
-	}
-	data2
 }
 
 # to convert in Rcpp
