@@ -453,15 +453,19 @@ parse.vam.formula <- function(obj,formula,Rcpp.mode=FALSE) {
 		cm <- formula[[2]]
 	} else {
 		tmp <- formula[[2]]
+		## simplify parenthesis
+		while(tmp[[1]] == as.name("(")) tmp <- tmp[[2]]
 		if(tmp[[1]] != as.name("&") && length(tmp) != 3) stop("Left part of formula of the form 'Time & Type'!")
 		if(length(tmp[[2]])==3 && tmp[[2]][[1]]==as.name("&")) {
 			response <- c(as.character(tmp[[2]][[2]]),as.character(tmp[[2]][[3]]),as.character(tmp[[3]]))
 		} else response <- c(as.character(tmp[[2]]),as.character(tmp[[3]]))
 		cm <- formula[[3]]
 	}
+	## simplify parenthesis
+	while(cm[[1]] == as.name("(")) cm <- cm[[2]]
 	pms <- list()
 	policy <- NULL
-	if(cm[[1]] == as.name("&")) { # there is a PM part
+	if(there.is.pm <- (cm[[1]] == as.name("&"))) { # there is a PM part
 		pm <- cm[[3]]
 		cm <- cm[[2]]
 		# deal with PM part
@@ -499,8 +503,12 @@ parse.vam.formula <- function(obj,formula,Rcpp.mode=FALSE) {
 	 
 	# parser for cm
 	parse.cm <- function(cm) {
-		if(cm[[1]] != as.name("(")) stop("CM needs a family!")
-		cm <- cm[[2]]
+		# print(there.is.pm)
+		# print(cm)
+		if(there.is.pm) {
+			if(cm[[1]] == as.name("(")) cm <- cm[[2]]
+			else stop("CM needs a family!")
+		}
 		if(cm[[1]] != as.name("|")) stop("CM needs a family!")
 		family <- cm[[3]]
 		if(is.name(family[[1]])) {
