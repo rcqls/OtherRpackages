@@ -96,6 +96,8 @@ public:
 
     void update_Vleft(bool with_gradient);
 
+    List get_virtual_age_infos(double by);
+
 private:
 	void set_models(List models_);
 
@@ -104,6 +106,11 @@ private:
     void set_maintenance_policy(List maintenance_policy_);
 
 	void init(List model_);
+
+	void init_virtual_age_infos();
+
+	DataFrame get_virtual_age_info(double from,double to,double by);
+
 };
 
 #endif

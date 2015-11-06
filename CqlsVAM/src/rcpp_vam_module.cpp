@@ -2,7 +2,7 @@
 
 
 RCPP_MODULE(vam_module) {
-	class_<VamModel>("VamModelCpp")
+	class_<VamModel>("ModelVamCpp")
 	.constructor<List>()
 	.constructor<List,List>()
 	.field( "time", &VamModel::time, "time" )
@@ -11,6 +11,7 @@ RCPP_MODULE(vam_module) {
 	.method( "family", &VamModel::get_family, "get family" )
 	.method("get_params",&VamModel::get_params,"get params")
     .method("set_params",&VamModel::set_params,"set params")
+    .method("get_virtual_age_infos",&VamModel::get_virtual_age_infos,"get infos related to virtual ages")
 	;
 
     class_<SimVam>( "SimVamCpp" )
@@ -19,6 +20,7 @@ RCPP_MODULE(vam_module) {
     .method("simulate",&SimVam::simulate,"simulate")
     .method("get_params",&SimVam::get_params,"get params")
     .method("set_params",&SimVam::set_params,"set params")
+    .method("get_virtual_age_infos",&SimVam::get_virtual_age_infos,"get infos related to virtual ages")
     ;
 
     class_<MLEVam>( "MLEVamCpp" )
@@ -30,6 +32,7 @@ RCPP_MODULE(vam_module) {
     .method("alpha_est",&MLEVam::get_alpha_est,"get alpha estimation")
     .method("get_params",&MLEVam::get_params,"get params")
     .method("set_params",&MLEVam::set_params,"set params")
+    .method("get_virtual_age_infos",&MLEVam::get_virtual_age_infos,"get infos related to virtual ages")
     ;
 
     class_<FamilyModel>("FamilyModelCpp")

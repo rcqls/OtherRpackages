@@ -65,6 +65,11 @@ public:
         model->set_params(pars);
     }
 
+    //delegate from model cache!
+    List get_virtual_age_infos(double by) {
+        return model->get_virtual_age_infos(by);
+    }
+
 
 private:
     VamModel* model;

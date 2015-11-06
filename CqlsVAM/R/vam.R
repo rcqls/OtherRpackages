@@ -128,6 +128,22 @@ simulate.sim.vam.cpp <- function(self, n=10, stop.time = Inf,as.list=FALSE) {
 	df
 }
 
+# Model part
+
+model.vam.cpp <- function(formula,data) {
+	self <- newEnv(model.vam.cpp,formula=formula,data=data)
+
+	PersistentRcppObject(self,new = {
+		model <- parse.vam.formula(NULL,self$formula,Rcpp.mode=TRUE)
+		response <- model$response
+		data <- data.frame.to.list.mle.vam.cpp(self$data,response)
+		rcpp <- new(ModelVamCpp,model,data)
+		rcpp 
+	})
+
+	self
+}
+
 # Estimation part! The usual way in R
 
 mle.vam <- function(formula,data) {
