@@ -43,7 +43,8 @@ public:
   		Function sample_int = Environment::base_env()["sample.int"];
   		List res;
   		res["time"] = from + (floor((current - from)/by) + 1) * by;
-		res["type"]=sample_int(prob.size(),1,true,prob);
+        //First argument not automatically wrapped in RcppWin64bits 
+		res["type"]=sample_int(NumericVector::create(prob.size()),1,true,prob);
 		return res;
     }
  
