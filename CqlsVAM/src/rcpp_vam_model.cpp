@@ -62,7 +62,7 @@ void VamModel::set_family(List family_) {
 
 void VamModel::set_maintenance_policy(List maintenance_policy_) {
 	maintenance_policy=newMaintenancePolicy(maintenance_policy_);
-	if(maintenance_policy==NULL) printf("maintenance_policy is NULL\n");
+	//if(maintenance_policy==NULL) printf("maintenance_policy is NULL\n");
 };
 
 void VamModel::init(List model_) {
