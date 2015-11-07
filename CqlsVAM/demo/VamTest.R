@@ -89,24 +89,25 @@ helpExp <- function() {
 		"-> set nExp (i.e. the number of simulated failures).",
 		"   Notice that you are in the case of single or multi system(s) depending on the value of length of nExp.",
 		"-> runMleExp() to provide estimates on newly simulated data",
-		"-> plotExp() to plot model against newly simulated data",
+		"-> plotExp(type) to plot model against newly simulated data (with type='v','h' or 'H')",
 		sep="\n"
 	)
 }
 
 runMleExp <- function(multi=length(nExp)>1) {
 	if(!multi) {
-			cat("Simulating...\n")
-			simulate(simCppExp,nExp) -> simDfExp
-			cat("Number of events:",nExp,"\n")
-			update(mleCppExp,data=simDfExp)
-			print(coef(mleCppExp,par0Exp))
+		cat("Simulating...\n")
+		simulate(simCppExp,nExp) -> simDfExp
+		cat("Number of events:",nExp,"\n")
+		update(mleCppExp,data=simDfExp)
+		print(coef(mleCppExp,par0Exp))
 	} else {
-			cat("Simulating...\n")
-			simulate(simCppMultiExp,nExp,as.list=TRUE) -> simDfMultiExp
-			cat("Number of events:",nExp,"\n")
-			update(mleCppMultiExp,data=simDfMultiExp)
-			print(coef(mleCppMultiExp,par0Exp))
+		cat("Simulating...\n")
+		simulate(simCppExp,nExp,as.list=TRUE) -> simDfMultiExp
+		cat("Table of number of system:\n")
+		print(table(nExp))
+		update(mleCppMultiExp,data=simDfMultiExp)
+		print(coef(mleCppMultiExp,par0Exp))
 	}
 }
 
