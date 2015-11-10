@@ -111,15 +111,17 @@ runMleExp <- function(multi=length(nExp)>1) {
 	}
 }
 
-plotExp <-function(type="v",multi=length(nExp)>1) {
+plotExp <-function(type="v",multi=length(nExp)>1,...) {
 	if(!multi) {
 			cat("Simulating...\n")
 			simulate(simCppExp,nExp) -> simDfExp
 			cat("Number of system:",nExp,"\n")
 			update(modelCppExp,data=simDfExp)
-			plot(modelCppExp,type=type)
+			plot(modelCppExp,type=type,...)
 	}
 }
+
+selectExp(1) #default
 
 helpExp()
 
