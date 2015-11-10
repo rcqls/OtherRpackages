@@ -20,7 +20,7 @@ RCPP_MODULE(vam_module) {
     .method("set_params",&VamModel::set_params,"set params")
     .method("get_virtual_age_infos",&VamModel::get_virtual_age_infos,"get infos related to virtual ages")
 	.method("set_data",&VamModel::set_data,"set data")
-    .method("get_selected_data",&VamModel::get_selected_data,"get selected data")
+    .method("get_data",&VamModel::get_selected_data,"get (selected) data")
     ;
 
     class_<SimVam>( "SimVamCpp" )
@@ -46,6 +46,7 @@ RCPP_MODULE(vam_module) {
     .method("get_params",&MLEVam::get_params,"get params")
     .method("set_params",&MLEVam::set_params,"set params")
     .method("get_virtual_age_infos",&MLEVam::get_virtual_age_infos,"get infos related to virtual ages")
+    .method("get_data",&MLEVam::get_selected_data,"get (selected) data")
     ;
 
     class_<FamilyModel>("FamilyModelCpp")

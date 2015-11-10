@@ -1,6 +1,6 @@
 plot.model.vam.cpp <- function(obj,type=c("virtual.age","intensity","cumulative","h","H"),from,to,by=0.1) {
 	rcpp <- rcpp(obj)
-	d <- rcpp$get_selected_data(0) #0 since one-system first!
+	d <- if(inherits(obj,"sim.vam.cpp")) rcpp$get_data() else rcpp$get_data(0) #0 since one-system first!
 	infos <- rcpp$get_virtual_age_infos(by)
 	if(missing(from)) from <- min(d$Time)
 	if(missing(to)) to <- max(d$Time)
@@ -38,3 +38,5 @@ plot.model.vam.cpp <- function(obj,type=c("virtual.age","intensity","cumulative"
 	}
 
 }
+
+plot.mle.vam.cpp <- plot.sim.vam.cpp <- plot.model.vam.cpp

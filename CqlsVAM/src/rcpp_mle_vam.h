@@ -125,6 +125,10 @@ public:
         return model->get_virtual_age_infos(by);
     }
 
+    DataFrame get_selected_data(int i) {
+        return model->get_selected_data(i);
+    }
+
 private:
 
 	VamModel* model;
